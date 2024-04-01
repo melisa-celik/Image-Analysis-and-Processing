@@ -14,5 +14,9 @@ int main()
 
     Exercise2(binaryImage);
 
+    cv::Mat testImageEthalon = cv::imread("C:\\Users\\Lenovo\\source\\repos\\ImageAnalysis & Processing\\ImageAnalysis & Processing\\Images\\ethalon.png", cv::IMREAD_GRAYSCALE);
+
+    Exercise3(testImageEthalon);
+
     return 0;
 }

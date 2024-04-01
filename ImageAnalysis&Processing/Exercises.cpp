@@ -98,3 +98,37 @@ void Exercise2(const cv::Mat& binaryImage)
 	cv::imshow("Result", widenedImage);
 	cv::waitKey(0);
 }
+
+void Exercise3(const cv::Mat& binaryImage)
+{
+	if (binaryImage.empty()) {
+		std::cerr << "Error: Input binary image is empty." << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+	std::unordered_map<std::string, std::vector<cv::Point2d>> trainingData;
+
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	for (size_t i = 0; i < contours.size(); ++i) {
+		cv::Moments moments = cv::moments(contours[i]);
+		cv::Point2d centroid(moments.m10 / moments.m00, moments.m01 / moments.m00);
+		double area = cv::contourArea(contours[i]);
+
+		std::vector<cv::Point2d> features;
+		features.push_back(centroid);  
+		features.push_back(cv::Point2d(area, 0));  
+
+		std::string objectName = "Object" + std::to_string(i + 1);
+		trainingData[objectName] = features;
+
+		cv::drawContours(binaryImage, contours, static_cast<int>(i), cv::Scalar(128), 2);
+	}
+
+	std::unordered_map<std::string, cv::Point2d> etalons = computeEtalons(trainingData);
+
+	drawFigure1(trainingData, etalons);
+
+	drawFigure2(etalons);
+}

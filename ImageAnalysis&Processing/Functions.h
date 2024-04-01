@@ -4,6 +4,7 @@
 #define FUNCTIONS_H
 
 #include <opencv2/opencv.hpp>
+#include <unordered_map>
 
 double computeArea(const cv::Mat& binaryImage);
 
@@ -15,7 +16,12 @@ void computeMinMaxMoments(const cv::Moments& moments, double& minMoment, double&
 
 void computeFeatures(const cv::Mat& binaryImage, int imgIndex);
 
-void computeEthalons(const std::vector<std::vector<cv::Point>>& contours, const std::vector<int>& labels, std::vector<cv::Point2d>& sqaureEthalon,
-	std::vector<cv::Point2d>& rectangleEthalon, std::vector<cv::Point2d>& triangleEthalon);
+std::unordered_map<std::string, cv::Point2d> computeEtalons(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData);
+
+std::string classifyObjects(const std::unordered_map<std::string, cv::Point2d>& etalons, const cv::Point2d& unknownObject);
+
+void drawFigure1(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData, const std::unordered_map<std::string, cv::Point2d>& etalons);
+
+void drawFigure2(const std::unordered_map<std::string, cv::Point2d>& etalons);
 
 #endif // FUNCTIONS_H

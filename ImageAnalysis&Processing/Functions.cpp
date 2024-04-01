@@ -64,8 +64,86 @@ void computeFeatures(const cv::Mat& binaryImage, int imgIndex)
     std::cout << "---------------------------------------------" << std::endl;
 }
 
-void computeEthalons(const std::vector<std::vector<cv::Point>>& contours, const std::vector<int>& labels, std::vector<cv::Point2d>& sqaureEthalon, std::vector<cv::Point2d>& rectangleEthalon, std::vector<cv::Point2d>& triangleEthalon)
+std::unordered_map<std::string, cv::Point2d> computeEtalons(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData)
 {
+    std::unordered_map<std::string, cv::Point2d> etalons;
 
+    for (const auto& entry : trainingData) {
+        const std::string& classLabel = entry.first;
+        const std::vector<cv::Point2d>& features = entry.second;
+
+        cv::Point2d etalon(0, 0);
+
+        for (const auto& feature : features) {
+            etalon.x += feature.x;
+            etalon.y += feature.y;
+        }
+        etalon.x /= features.size();
+        etalon.y /= features.size();
+
+        etalons[classLabel] = etalon;
+    }
+
+    return etalons;
+}
+
+std::string classifyObjects(const std::unordered_map<std::string, cv::Point2d>& etalons, const cv::Point2d& unknownObject)
+{
+    std::string closestClass;
+    double minDistance = std::numeric_limits<double>::max();
+
+    for (const auto& entry : etalons) {
+        const cv::Point2d& etalon = entry.second;
+        double distance = cv::norm(etalon - unknownObject);
+
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestClass = entry.first;
+        }
+    }
+
+    return closestClass;
+}
+
+void drawFigure1(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData, const std::unordered_map<std::string, cv::Point2d>& etalons)
+{
+    cv::Mat visualization(500, 500, CV_8UC3, cv::Scalar(255, 255, 255));
+
+    for (const auto& entry : trainingData) {
+        const std::string& classLabel = entry.first;
+        const std::vector<cv::Point2d>& features = entry.second;
+
+        for (const auto& feature : features) {
+            cv::circle(visualization, feature, 3, cv::Scalar(0, 0, 0), cv::FILLED);
+        }
+
+        cv::Point2d etalon = etalons.at(classLabel);
+        cv::circle(visualization, etalon, 5, cv::Scalar(0, 0, 255), cv::FILLED);
+
+        cv::putText(visualization, classLabel, etalon + cv::Point2d(10, -5), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0), 1);
+    }
+
+    cv::imshow("Features and Etalons", visualization);
+    cv::waitKey(0);
+}
+
+void drawFigure2(const std::unordered_map<std::string, cv::Point2d>& etalons)
+{
+    cv::Mat illustration(500, 500, CV_8UC3, cv::Scalar(255, 255, 255));
+
+    for (const auto& entry : etalons) {
+        const cv::Point2d& etalon = entry.second;
+
+        cv::circle(illustration, etalon, 3, cv::Scalar(0, 0, 0), cv::FILLED);
+    }
+
+    for (const auto& entry : etalons) {
+        const cv::Point2d& etalon = entry.second;
+
+        cv::circle(illustration, etalon, 5, cv::Scalar(0, 0, 255), cv::FILLED);
+    }
+
+    cv::imshow("Illustration", illustration);
+    cv::waitKey(0);
 }
 
