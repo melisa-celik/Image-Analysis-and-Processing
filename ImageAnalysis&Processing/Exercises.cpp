@@ -117,6 +117,9 @@ void Exercise3(const cv::Mat& image)
 	std::vector<FeatureVector> featureVectors;
 	std::vector<std::string> labels;
 
+	// Assuming labels are provided elsewhere in your code
+	// For example, if you know the order of objects in the image
+	// you can assign labels accordingly
 	labels.push_back("Square");
 	labels.push_back("Square");
 	labels.push_back("Rectangle");
@@ -141,6 +144,4 @@ void Exercise3(const cv::Mat& image)
 	std::string result = classifier.classifyObject(unknownFeatures);
 
 	std::cout << "Unknown object belongs to class: " << result << std::endl;
-
-	cv::waitKey(0);
 }

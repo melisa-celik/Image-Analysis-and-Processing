@@ -64,7 +64,7 @@ void computeFeatures(const cv::Mat& binaryImage, int imgIndex)
     std::cout << "---------------------------------------------" << std::endl;
 }
 
-FeatureVector computeFeatures(const cv::Mat& binaryImage) 
+FeatureVector computeFeatures(const cv::Mat& binaryImage)
 {
     cv::Moments moments = cv::moments(binaryImage);
 
@@ -107,6 +107,60 @@ std::vector<cv::Mat> extractObjects(const cv::Mat& image) {
 
     return binaryImages;
 }
+
+//void drawFigure1(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels, const std::vector<Etalon>& etalons)
+//{
+//    cv::Mat illustration(600, 600, CV_8UC3, cv::Scalar(255, 255, 255));
+//
+//    for (size_t i = 0; i < featureVectors.size(); ++i) {
+//        int x = static_cast<int>(featureVectors[i].x1 * 100) + 300;
+//        int y = static_cast<int>(featureVectors[i].x2 * 100) + 300;
+//        cv::Scalar color;
+//        if (labels[i] == "Square")
+//            color = cv::Scalar(0, 0, 255); // Red
+//        else if (labels[i] == "Rectangle")
+//            color = cv::Scalar(0, 255, 0); // Green
+//        else if (labels[i] == "Star")
+//            color = cv::Scalar(255, 0, 0); // Blue
+//        cv::circle(illustration, cv::Point(x, y), 5, color, -1);
+//    }
+//
+//    for (const auto& etalon : etalons) {
+//        int x = static_cast<int>(etalon.x1 * 100) + 300;
+//        int y = static_cast<int>(etalon.x2 * 100) + 300;
+//        cv::circle(illustration, cv::Point(x, y), 10, cv::Scalar(0, 0, 0), 2);
+//    }
+//
+//    cv::imshow("X Illustration", illustration);
+//    cv::waitKey(0);
+//}
+//
+//void drawFigure2(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels, const std::vector<Etalon>& etalons)
+//{
+//    cv::Mat illustration(600, 600, CV_8UC3, cv::Scalar(255, 255, 255));
+//
+//    for (size_t i = 0; i < featureVectors.size(); ++i) {
+//        int x = static_cast<int>(featureVectors[i].F1 * 100) + 300;
+//        int y = static_cast<int>(featureVectors[i].F2 * 100) + 300;
+//        cv::Scalar color;
+//        if (labels[i] == "Square")
+//            color = cv::Scalar(0, 0, 255); // Red
+//        else if (labels[i] == "Rectangle")
+//            color = cv::Scalar(0, 255, 0); // Green
+//        else if (labels[i] == "Star")
+//            color = cv::Scalar(255, 0, 0); // Blue
+//        cv::circle(illustration, cv::Point(x, y), 5, color, -1);
+//    }
+//
+//    for (const auto& etalon : etalons) {
+//        int x = static_cast<int>(etalon.F1 * 100) + 300;
+//        int y = static_cast<int>(etalon.F2 * 100) + 300;
+//        cv::circle(illustration, cv::Point(x, y), 10, cv::Scalar(0, 0, 0), 2);
+//    }
+//
+//    cv::imshow("F Illustration", illustration);
+//    cv::waitKey(0);
+//}
 
 
 //std::unordered_map<std::string, cv::Point2d> computeEtalons(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData)

@@ -26,10 +26,12 @@ std::string EtalonClassifier::classifyObject(const FeatureVector& unknownObject)
 void EtalonClassifier::computeEtalons(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels) {
     std::unordered_map<std::string, std::vector<FeatureVector>> classFeatureVectors;
 
+    // Group feature vectors by class
     for (size_t i = 0; i < labels.size(); ++i) {
         classFeatureVectors[labels[i]].push_back(featureVectors[i]);
     }
 
+    // Compute etalons for each class
     for (const auto& pair : classFeatureVectors) {
         const std::string& className = pair.first;
         const std::vector<FeatureVector>& classVectors = pair.second;

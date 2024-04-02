@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma once
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
@@ -21,12 +23,8 @@ FeatureVector computeFeatures(const cv::Mat& binaryImage);
 
 std::vector<cv::Mat> extractObjects(const cv::Mat& image);
 
-//std::unordered_map<std::string, cv::Point2d> computeEtalons(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData);
+//void drawFigure1(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels, const std::vector<Etalon>& etalons);
 //
-//std::string classifyObjects(const std::unordered_map<std::string, cv::Point2d>& etalons, const cv::Point2d& unknownObject);
-//
-//void drawFigure1(const std::unordered_map<std::string, std::vector<cv::Point2d>>& trainingData, const std::unordered_map<std::string, cv::Point2d>& etalons);
-//
-//void drawFigure2(const std::unordered_map<std::string, cv::Point2d>& etalons);
+//void drawFigure2(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels, const std::vector<Etalon>& etalons);
 
 #endif // FUNCTIONS_H
