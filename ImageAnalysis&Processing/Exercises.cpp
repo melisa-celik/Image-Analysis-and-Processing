@@ -1,17 +1,17 @@
 #include "Exercises.h"
 #include "Functions.h"
 
-void Exercise1(const cv::Mat& binaryImage)
+void Exercise1(const cv::Mat& image)
 {
 	// load color image from file system to Mat variable, this will be loaded using 8 bits (uchar)
-	cv::imshow("Lena", binaryImage);
+	cv::imshow("Lena", image);
 
 	// declare variable to hold grayscale version of img variable, gray levels wil be represented using 8 bits(uchar)
 	cv::Mat gray_8uc1_img;
 	// declare variable to hold grayscale version of img variable, gray levels wil be represented using 32 bits(float)
 	cv::Mat gray_32fc1_img;
 
-	cv::cvtColor(binaryImage, gray_8uc1_img, cv::COLOR_BGR2GRAY);
+	cv::cvtColor(image, gray_8uc1_img, cv::COLOR_BGR2GRAY);
 	// convert input color image to grayscale one, CV_BGR2GRAY specifies direction of conversion
 	gray_8uc1_img.convertTo(gray_32fc1_img, CV_32FC1, 1.0 / 255.0);
 	// convert grayscale image from 8 bits to 32 bits, resulting values will be in the interval 0.0 - 1.0
@@ -23,7 +23,7 @@ void Exercise1(const cv::Mat& binaryImage)
 	// read grayscale value of a pixel, image represented using 8 bits
 	float p2 = gray_32fc1_img.at<float>(y, x);
 	// read grayscale value of a pixel, image represented using 32 bits
-	cv::Vec3b p3 = binaryImage.at<cv::Vec3b>(y, x);
+	cv::Vec3b p3 = image.at<cv::Vec3b>(y, x);
 	// read color value of a pixel, image represented using 8 bits per color channel
 
 	// print values of pixels
@@ -60,75 +60,87 @@ void Exercise1(const cv::Mat& binaryImage)
 	// wait until keypressed
 }
 
-void Exercise2(const cv::Mat& binaryImage)
+void Exercise2(const cv::Mat& image)
 {
-	if (binaryImage.empty()) {
+	if (image.empty()) {
 		std::cerr << "Error: Couldn't load the binary image." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-	cv::threshold(binaryImage, binaryImage, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	cv::threshold(image, image, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
 	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(binaryImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	for (size_t i = 0; i < contours.size(); ++i) {
-		cv::Mat mask = cv::Mat::zeros(binaryImage.size(), CV_8UC1);
+		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
 		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
 		double area = computeArea(mask);
 		int circumference = computeCircumference(mask);
 
-		cv::drawContours(binaryImage, contours, static_cast<int>(i), cv::Scalar(128), 2);
+		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
 
 		cv::Rect bbox = cv::boundingRect(contours[i]);
 
 		cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
 
-		cv::putText(binaryImage, "Img" + std::to_string(i + 1), center, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-		cv::putText(binaryImage, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-		cv::putText(binaryImage, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Img" + std::to_string(i + 1), center, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 
 		computeFeatures(mask, i + 1);
 	}
 
 	cv::Mat widenedImage;
-	cv::copyMakeBorder(binaryImage, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
+	cv::copyMakeBorder(image, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
 
 	cv::imshow("Result", widenedImage);
 	cv::waitKey(0);
 }
 
-void Exercise3(const cv::Mat& binaryImage)
+void Exercise3(const cv::Mat& image)
 {
-	if (binaryImage.empty()) {
-		std::cerr << "Error: Input binary image is empty." << std::endl;
+	if (image.empty()) {
+		std::cerr << "Failed to load image." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-	std::unordered_map<std::string, std::vector<cv::Point2d>> trainingData;
+	cv::Mat grayImage;
+	cv::cvtColor(image, grayImage, cv::COLOR_BGR2GRAY);
 
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(binaryImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::Mat binaryImage;
+	cv::threshold(grayImage, binaryImage, 0, 255, cv::THRESH_BINARY);
 
-	for (size_t i = 0; i < contours.size(); ++i) {
-		cv::Moments moments = cv::moments(contours[i]);
-		cv::Point2d centroid(moments.m10 / moments.m00, moments.m01 / moments.m00);
-		double area = cv::contourArea(contours[i]);
+	std::vector<cv::Mat> binaryImages = extractObjects(binaryImage);
 
-		std::vector<cv::Point2d> features;
-		features.push_back(centroid);  
-		features.push_back(cv::Point2d(area, 0));  
+	std::vector<FeatureVector> featureVectors;
+	std::vector<std::string> labels;
 
-		std::string objectName = "Object" + std::to_string(i + 1);
-		trainingData[objectName] = features;
+	labels.push_back("Square");
+	labels.push_back("Square");
+	labels.push_back("Rectangle");
+	labels.push_back("Rectangle");
+	labels.push_back("Star");
 
-		cv::drawContours(binaryImage, contours, static_cast<int>(i), cv::Scalar(128), 2);
+	for (int i = 0; i < 5; ++i) {
+		cv::Mat binaryObject = binaryImages[i];
+
+		FeatureVector features = computeFeatures(binaryObject);
+
+		featureVectors.push_back(features);
 	}
 
-	std::unordered_map<std::string, cv::Point2d> etalons = computeEtalons(trainingData);
+	EtalonClassifier classifier;
 
-	drawFigure1(trainingData, etalons);
+	classifier.addTrainingData(featureVectors, labels);
 
-	drawFigure2(etalons);
+	cv::Mat unknownObject = binaryImages[5];
+
+	FeatureVector unknownFeatures = computeFeatures(unknownObject);
+	std::string result = classifier.classifyObject(unknownFeatures);
+
+	std::cout << "Unknown object belongs to class: " << result << std::endl;
+
+	cv::waitKey(0);
 }
