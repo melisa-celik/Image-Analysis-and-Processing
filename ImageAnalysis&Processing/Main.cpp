@@ -10,7 +10,7 @@ int main()
 
     //Exercise1(src_8uc3_img);
 
-    cv::Mat binaryImage = cv::imread("C:\\Users\\Lenovo\\source\\repos\\IA_2\\IA_2\\Images\\binary_image.png", cv::IMREAD_GRAYSCALE);
+    //cv::Mat binaryImage = cv::imread("C:\\Users\\Lenovo\\source\\repos\\IA_2\\IA_2\\Images\\train.png", cv::IMREAD_GRAYSCALE);
 
     //Exercise2(binaryImage);
 

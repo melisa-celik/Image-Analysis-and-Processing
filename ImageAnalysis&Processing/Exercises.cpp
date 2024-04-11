@@ -101,47 +101,75 @@ void Exercise2(const cv::Mat& image)
 
 void Exercise3(const cv::Mat& image)
 {
+	// Check if the input image is empty
 	if (image.empty()) {
-		std::cerr << "Failed to load image." << std::endl;
+		std::cerr << "Error: Input image is empty." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-	cv::Mat grayImage;
-	cv::cvtColor(image, grayImage, cv::COLOR_BGR2GRAY);
+	// Print the type of the input image
+	std::cout << "Input image type: " << image.type() << std::endl;
 
-	cv::Mat binaryImage;
-	cv::threshold(grayImage, binaryImage, 0, 255, cv::THRESH_BINARY);
+	// Display the input image
+	cv::imshow("Input Image", image);
+	cv::waitKey(0);
 
-	std::vector<cv::Mat> binaryImages = extractObjects(binaryImage);
+	// Check if the input image is of type CV_8UC1 (single-channel 8-bit)
+	if (image.type() != CV_8UC1) {
+		// Convert the input image to grayscale
+		cv::Mat grayscaleImage;
+		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
 
-	std::vector<FeatureVector> featureVectors;
-	std::vector<std::string> labels;
+		// Print the type of the grayscale image
+		std::cout << "Grayscale image type: " << grayscaleImage.type() << std::endl;
 
-	// Assuming labels are provided elsewhere in your code
-	// For example, if you know the order of objects in the image
-	// you can assign labels accordingly
-	labels.push_back("Square");
-	labels.push_back("Square");
-	labels.push_back("Rectangle");
-	labels.push_back("Rectangle");
-	labels.push_back("Star");
+		// Display the grayscale image
+		cv::imshow("Grayscale Image", grayscaleImage);
+		cv::waitKey(0);
 
-	for (int i = 0; i < 5; ++i) {
-		cv::Mat binaryObject = binaryImages[i];
-
-		FeatureVector features = computeFeatures(binaryObject);
-
-		featureVectors.push_back(features);
+		// Continue with the grayscale image
+		processImage(grayscaleImage);
 	}
+	else {
+		// Continue with the original input image
+		processImage(image);
+	}
+}
 
+void processImage(const cv::Mat& image)
+{
+	// In Exercise 3, we will use the EtalonClassifier class to classify objects in the image.
+
+	// Load the test image
+	cv::Mat testImage = image;
+
+	// Load the training images
+	std::vector<cv::Mat> trainingImages;
+	std::vector<std::string> labels;  // Add this line
+
+	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png", cv::IMREAD_GRAYSCALE));
+	labels.push_back("square"); 
+	labels.push_back("rectangle");
+	labels.push_back("star");
+
+	// Create an instance of the EtalonClassifier class
 	EtalonClassifier classifier;
 
-	classifier.addTrainingData(featureVectors, labels);
+	// Compute the ethalons
+	classifier.computeEthalons(trainingImages, labels);  // Provide both trainingImages and labels
 
-	cv::Mat unknownObject = binaryImages[5];
+	// Classify the object in the test image
+	std::string result = classifier.classifyObject(testImage);
 
-	FeatureVector unknownFeatures = computeFeatures(unknownObject);
-	std::string result = classifier.classifyObject(unknownFeatures);
+	// Print the result
+	std::cout << "Classified object as: " << result << std::endl;
 
-	std::cout << "Unknown object belongs to class: " << result << std::endl;
+	// Display the test image
+	cv::imshow("Test Image", testImage);
+	cv::waitKey(0);
 }
+
+
+
+
+

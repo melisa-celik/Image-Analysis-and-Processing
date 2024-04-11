@@ -1,39 +1,28 @@
-#pragma once
+#ifndef ETALONCLASSIFIER_H
+#define ETALONCLASSIFIER_H
 
-#ifndef ETALON_CLASSIFIER_H
-#define ETALON_CLASSIFIER_H
-
-#include <vector>
 #include <opencv2/opencv.hpp>
-#include <iostream>
-
-struct FeatureVector {
-    double area;
-    double circumference;
-    double F1;
-    double F2;
-};
 
 class EtalonClassifier {
 public:
     EtalonClassifier();
+    ~EtalonClassifier();
 
-    void addTrainingData(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels);
-
-    std::string classifyObject(const FeatureVector& unknownObject);
+    void computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels);
+    void saveEthalons(const std::string& filename);
+    void loadEthalons(const std::string& filename);
+    std::string classifyObject(const cv::Mat& testImage);
 
 private:
-    struct Etalon {
-        double F1;
-        double F2;
-        std::string label;
-    };
+    std::map<std::string, cv::Vec2d> ethalons;
 
-    std::vector<Etalon> etalons;
-
-    void computeEtalons(const std::vector<FeatureVector>& featureVectors, const std::vector<std::string>& labels);
-
-    double distance(const FeatureVector& v1, const Etalon& etalon);
+    double computeArea(const cv::Mat& binaryImage);
+    cv::Point2d computeCenterOfMass(const cv::Moments& moments);
+    int computeCircumference(const cv::Mat& binaryImage);
+    void computeMinMaxMoments(const cv::Moments& moments, double& minMoment, double& maxMoment);
+    double computeF1(const cv::Mat& binaryImage);
+    double computeF2(const cv::Mat& binaryImage);
+    cv::Vec2d computeFeatures(const cv::Mat& binaryImage);
 };
 
-#endif
+#endif // ETALONCLASSIFIER_H
