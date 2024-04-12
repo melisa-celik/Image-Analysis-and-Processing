@@ -7,7 +7,7 @@ class EtalonClassifier {
 public:
     EtalonClassifier();
     ~EtalonClassifier();
-
+    cv::Vec2d getFeatures(const cv::Mat& binaryImage);
     void computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels);
     void saveEthalons(const std::string& filename);
     void loadEthalons(const std::string& filename);
@@ -15,7 +15,6 @@ public:
 
 private:
     std::map<std::string, cv::Vec2d> ethalons;
-
     double computeArea(const cv::Mat& binaryImage);
     cv::Point2d computeCenterOfMass(const cv::Moments& moments);
     int computeCircumference(const cv::Mat& binaryImage);

@@ -16,7 +16,12 @@ int main()
 
     cv::Mat testImageEthalon = cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png");
 
-    Exercise3(testImageEthalon);
+    if (testImageEthalon.empty()) {
+        std::cerr << "Error: Failed to load image." << std::endl;
+        return EXIT_FAILURE;
+    }
 
-    return 0;
+    processImage(testImageEthalon);
+
+    return EXIT_SUCCESS;
 }

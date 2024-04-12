@@ -136,40 +136,103 @@ void Exercise3(const cv::Mat& image)
 	}
 }
 
+//void processImage(const cv::Mat& image)
+//{
+//	// In Exercise 3, we will use the EtalonClassifier class to classify objects in the image.
+//
+//	// Load the test image
+//	cv::Mat testImage = image;
+//
+//	// Load the training images
+//	std::vector<cv::Mat> trainingImages;
+//	std::vector<std::string> labels;  // Add this line
+//
+//	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png", cv::IMREAD_GRAYSCALE));
+//	labels.push_back("square"); 
+//	labels.push_back("rectangle");
+//	labels.push_back("star");
+//
+//	// Create an instance of the EtalonClassifier class
+//	EtalonClassifier classifier;
+//
+//	// Compute the ethalons
+//	classifier.computeEthalons(trainingImages, labels);  // Provide both trainingImages and labels
+//
+//	// Classify the object in the test image
+//	std::string result = classifier.classifyObject(testImage);
+//
+//	// Print the result
+//	std::cout << "Classified object as: " << result << std::endl;
+//
+//	// Display the test image
+//	cv::imshow("Test Image", testImage);
+//	cv::waitKey(0);
+//}
+
+
+void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier) {
+	// Convert the image to grayscale
+	cv::Mat grayscaleImage;
+	cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
+
+	// Threshold the grayscale image
+	cv::Mat binaryImage;
+	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
+
+	// Find contours in the binary image
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	// Classify and colorize each contour
+	for (size_t i = 0; i < contours.size(); ++i) {
+		// Compute features for the contour
+		cv::Mat contourImage = cv::Mat::zeros(image.size(), CV_8UC1);
+		cv::drawContours(contourImage, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
+		cv::Vec2d features = classifier.getFeatures(contourImage);
+
+		// Classify the contour
+		std::string label = classifier.classifyObject(contourImage);
+
+		// Colorize the contour based on its classification
+		cv::Scalar color;
+		if (label == "square") {
+			color = cv::Scalar(255, 0, 0); // Blue
+		}
+		else if (label == "rectangle") {
+			color = cv::Scalar(0, 255, 0); // Green
+		}
+		else if (label == "star") {
+			color = cv::Scalar(0, 0, 255); // Red
+		}
+
+		// Draw the colored contour on the original image
+		cv::drawContours(image, contours, static_cast<int>(i), color, cv::FILLED);
+	}
+}
+
 void processImage(const cv::Mat& image)
 {
-	// In Exercise 3, we will use the EtalonClassifier class to classify objects in the image.
-
-	// Load the test image
-	cv::Mat testImage = image;
-
-	// Load the training images
-	std::vector<cv::Mat> trainingImages;
-	std::vector<std::string> labels;  // Add this line
-
-	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png", cv::IMREAD_GRAYSCALE));
-	labels.push_back("square"); 
-	labels.push_back("rectangle");
-	labels.push_back("star");
-
 	// Create an instance of the EtalonClassifier class
 	EtalonClassifier classifier;
 
-	// Compute the ethalons
-	classifier.computeEthalons(trainingImages, labels);  // Provide both trainingImages and labels
+	// Load the training images and labels
+	std::vector<cv::Mat> trainingImages;
+	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\square.png", cv::IMREAD_GRAYSCALE));
+	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\rectangle.jpg", cv::IMREAD_GRAYSCALE));
+	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\star-red.jpg", cv::IMREAD_GRAYSCALE));
 
-	// Classify the object in the test image
-	std::string result = classifier.classifyObject(testImage);
+	std::vector<std::string> labels = { "square", "rectangle", "star" };
 
-	// Print the result
-	std::cout << "Classified object as: " << result << std::endl;
+	// Compute ethalons
+	classifier.computeEthalons(trainingImages, labels);
 
-	// Display the test image
-	cv::imshow("Test Image", testImage);
+	// Detect and colorize objects in the test image
+	cv::Mat testImage = image.clone();
+	detectAndColorizeObjects(testImage, classifier);
+
+	// Display the result
+	cv::imshow("Result", testImage);
 	cv::waitKey(0);
 }
-
-
-
 
 

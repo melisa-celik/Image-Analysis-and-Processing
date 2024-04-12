@@ -6,6 +6,11 @@ EtalonClassifier::EtalonClassifier() {}
 
 EtalonClassifier::~EtalonClassifier() {}
 
+cv::Vec2d EtalonClassifier::getFeatures(const cv::Mat& binaryImage)
+{
+    return computeFeatures(binaryImage);
+}
+
 void EtalonClassifier::computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels) {
     for (size_t i = 0; i < trainingImages.size(); ++i) {
         cv::Vec2d features = computeFeatures(trainingImages[i]);
