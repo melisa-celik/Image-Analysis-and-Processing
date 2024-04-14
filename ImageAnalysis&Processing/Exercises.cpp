@@ -169,7 +169,8 @@ void Exercise3(const cv::Mat& image)
 //	cv::waitKey(0);
 //}
 
-void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier) {
+void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier)
+{
 	// Convert the image to grayscale
 	cv::Mat grayscaleImage;
 	cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
@@ -178,27 +179,42 @@ void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier) {
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	// Classify the shape of the entire image
-	std::string shape = classifier.classifyShape(binaryImage);
+	// Classify objects in the binary image
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-	// Colorize the image based on the shape classification
-	cv::Scalar color;
-	if (shape == "square") {
-		color = cv::Scalar(255, 0, 0); // Blue
-	}
-	else if (shape == "rectangle") {
-		color = cv::Scalar(0, 255, 0); // Green
-	}
-	else if (shape == "star") {
-		color = cv::Scalar(0, 0, 255); // Red
-	}
-	else {
-		// Unknown shape
-		return;
+	// Iterate through each contour and classify the shape
+	for (const auto& contour : contours) {
+		// Convert contour to a binary mask
+		cv::Mat mask = cv::Mat::zeros(binaryImage.size(), CV_8UC1);
+		cv::drawContours(mask, std::vector<std::vector<cv::Point>>(1, contour), -1, cv::Scalar(255), cv::FILLED);
+
+		// Classify the shape
+		std::string shape = classifier.classifyShape(mask);
+
+		// Colorize the contour based on its shape
+		cv::Scalar color;
+		if (shape == "square") {
+			color = cv::Scalar(255, 0, 0); // Blue
+		}
+		else if (shape == "rectangle") {
+			color = cv::Scalar(0, 255, 0); // Green
+		}
+		else if (shape == "star") {
+			color = cv::Scalar(0, 0, 255); // Red
+		}
+		else {
+			// Unknown shape
+			continue;
+		}
+
+		// Draw the contour with the identified shape color
+		cv::drawContours(image, std::vector<std::vector<cv::Point>>(1, contour), -1, color, 2);
 	}
 
-	// Draw the entire image with the identified shape color
-	image.setTo(color);
+	// Display the result
+	cv::imshow("Result", image);
+	cv::waitKey(0);
 }
 
 

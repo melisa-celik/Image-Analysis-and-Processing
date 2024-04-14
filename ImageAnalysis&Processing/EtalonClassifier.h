@@ -13,19 +13,16 @@ public:
     void loadEthalons(const std::string& filename);
     std::string classifyObject(const cv::Mat& testImage);
     std::string classifyShape(const cv::Mat& binaryImage);
-    bool isSquare(const cv::Mat& binaryImage);
-    bool isRectangle(const cv::Mat& binaryImage);
-    bool isStar(const cv::Mat& binaryImage);
 
 private:
     std::map<std::string, cv::Vec2d> ethalons;
     double computeArea(const cv::Mat& binaryImage);
-    cv::Point2d computeCenterOfMass(const cv::Moments& moments);
-    int computeCircumference(const cv::Mat& binaryImage);
-    void computeMinMaxMoments(const cv::Moments& moments, double& minMoment, double& maxMoment);
     double computeF1(const cv::Mat& binaryImage);
     double computeF2(const cv::Mat& binaryImage);
-    cv::Vec2d computeFeatures(const cv::Mat& binaryImage, int imgIndex);
+    cv::Vec2d computeFeatures(const cv::Mat& binaryImage);
+    double distance(const cv::Vec2d& v1, const cv::Vec2d& v2);
+    int computeCircumference(const cv::Mat& binaryImage);
+    void computeMinMaxMoments(const cv::Moments& moments, double& minMoment, double& maxMoment);
 };
 
 #endif // ETALONCLASSIFIER_H
