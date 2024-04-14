@@ -169,7 +169,6 @@ void Exercise3(const cv::Mat& image)
 //	cv::waitKey(0);
 //}
 
-
 void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier) {
 	// Convert the image to grayscale
 	cv::Mat grayscaleImage;
@@ -179,36 +178,30 @@ void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier) {
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	// Find contours in the binary image
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(binaryImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	// Classify the shape of the entire image
+	std::string shape = classifier.classifyShape(binaryImage);
 
-	// Classify and colorize each contour
-	for (size_t i = 0; i < contours.size(); ++i) {
-		// Compute features for the contour
-		cv::Mat contourImage = cv::Mat::zeros(image.size(), CV_8UC1);
-		cv::drawContours(contourImage, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
-		cv::Vec2d features = classifier.getFeatures(contourImage);
-
-		// Classify the contour
-		std::string label = classifier.classifyObject(contourImage);
-
-		// Colorize the contour based on its classification
-		cv::Scalar color;
-		if (label == "square") {
-			color = cv::Scalar(255, 0, 0); // Blue
-		}
-		else if (label == "rectangle") {
-			color = cv::Scalar(0, 255, 0); // Green
-		}
-		else if (label == "star") {
-			color = cv::Scalar(0, 0, 255); // Red
-		}
-
-		// Draw the colored contour on the original image
-		cv::drawContours(image, contours, static_cast<int>(i), color, cv::FILLED);
+	// Colorize the image based on the shape classification
+	cv::Scalar color;
+	if (shape == "square") {
+		color = cv::Scalar(255, 0, 0); // Blue
 	}
+	else if (shape == "rectangle") {
+		color = cv::Scalar(0, 255, 0); // Green
+	}
+	else if (shape == "star") {
+		color = cv::Scalar(0, 0, 255); // Red
+	}
+	else {
+		// Unknown shape
+		return;
+	}
+
+	// Draw the entire image with the identified shape color
+	image.setTo(color);
 }
+
+
 
 void processImage(const cv::Mat& image)
 {

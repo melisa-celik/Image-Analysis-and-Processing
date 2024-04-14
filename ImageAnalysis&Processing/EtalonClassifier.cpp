@@ -8,14 +8,26 @@ EtalonClassifier::~EtalonClassifier() {}
 
 cv::Vec2d EtalonClassifier::getFeatures(const cv::Mat& binaryImage)
 {
-    return computeFeatures(binaryImage);
+    // Compute features using moments of the contour's binary image
+	cv::Moments moments = cv::moments(binaryImage);
+	double area = computeArea(binaryImage);
+	cv::Point2d centerOfMass = computeCenterOfMass(moments);
+	int circumference = computeCircumference(binaryImage);
+	double minMoment, maxMoment;
+	computeMinMaxMoments(moments, minMoment, maxMoment);
+	double F1 = (double)(circumference * circumference) / (100 * area);
+	double F2 = minMoment / maxMoment;
+	return cv::Vec2d(F1, F2);
 }
 
 void EtalonClassifier::computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels) {
-    for (size_t i = 0; i < trainingImages.size(); ++i) {
-        cv::Vec2d features = computeFeatures(trainingImages[i]);
-        ethalons[labels[i]] += features;
-    }
+    int imageIndex = 0;
+
+    for (const auto& image : trainingImages) {
+		cv::Vec2d features = getFeatures(image);
+		ethalons[labels[imageIndex]] += features;
+		imageIndex++;
+	}
 
     for (auto& ethalon : ethalons) {
         ethalon.second /= static_cast<double>(std::count(labels.begin(), labels.end(), ethalon.first));
@@ -59,7 +71,8 @@ void EtalonClassifier::loadEthalons(const std::string& filename) {
 }
 
 std::string EtalonClassifier::classifyObject(const cv::Mat& testImage) {
-    cv::Vec2d testFeatures = computeFeatures(testImage);
+    int imageIndex = 0;
+    cv::Vec2d testFeatures = getFeatures(testImage);
     double minDistance = std::numeric_limits<double>::max();
     std::string closestLabel;
 
@@ -123,9 +136,11 @@ double EtalonClassifier::computeF2(const cv::Mat& binaryImage) {
     return F2;
 }
 
-cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage) {
-    double area = computeArea(binaryImage);
+cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage, int imgIndex)
+{
+    // Compute features using moments of the contour's binary image
     cv::Moments moments = cv::moments(binaryImage);
+    double area = computeArea(binaryImage);
     cv::Point2d centerOfMass = computeCenterOfMass(moments);
     int circumference = computeCircumference(binaryImage);
     double minMoment, maxMoment;
@@ -133,4 +148,74 @@ cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage) {
     double F1 = (double)(circumference * circumference) / (100 * area);
     double F2 = minMoment / maxMoment;
     return cv::Vec2d(F1, F2);
+}
+
+std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
+{
+    if (isSquare(binaryImage)) {
+        return "square";
+    }
+    else if (isRectangle(binaryImage)) {
+        return "rectangle";
+    }
+    else if (isStar(binaryImage)) {
+        return "star";
+    }
+    else {
+        return "unknown";
+    }
+}
+
+bool EtalonClassifier::isSquare(const cv::Mat& binaryImage)
+{
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    if (contours.size() != 1) {
+        return false; // Not a single contour
+    }
+
+    cv::RotatedRect rect = cv::minAreaRect(contours[0]);
+    double aspectRatio = std::min(rect.size.width, rect.size.height) / std::max(rect.size.width, rect.size.height);
+    return (aspectRatio > 0.9 && aspectRatio < 1.1);
+}
+
+bool EtalonClassifier::isRectangle(const cv::Mat& binaryImage)
+{
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    if (contours.size() != 1) {
+        return false; // Not a single contour
+    }
+
+    cv::RotatedRect rect = cv::minAreaRect(contours[0]);
+    double aspectRatio = std::min(rect.size.width, rect.size.height) / std::max(rect.size.width, rect.size.height);
+    return (aspectRatio > 0.5 && aspectRatio < 2.0);
+}
+
+bool EtalonClassifier::isStar(const cv::Mat& binaryImage)
+{
+    std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    if (contours.size() != 1) {
+		return false; // Not a single contour
+	}
+
+	cv::RotatedRect rect = cv::minAreaRect(contours[0]);
+	double aspectRatio = std::min(rect.size.width, rect.size.height) / std::max(rect.size.width, rect.size.height);
+	return (aspectRatio > 0.2 && aspectRatio < 0.5);
+
+    //// Implement star detection logic here
+    //// This could involve detecting specific patterns in the contour or using more complex shape descriptors
+    //// For simplicity, let's assume a star if the contour has 6 vertices
+    //std::vector<std::vector<cv::Point>> contours;
+    //cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    //if (contours.size() != 1) {
+    //    return false; // Not a single contour
+    //}
+
+    //return (contours[0].size() == 6);
 }
