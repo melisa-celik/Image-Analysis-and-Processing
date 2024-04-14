@@ -1,5 +1,8 @@
 // EtalonClassifier.cpp
 #include "EtalonClassifier.h"
+#include <algorithm>
+#include <limits>
+#include "Functions.h"
 #include <fstream>
 #include <iostream>
 
@@ -14,11 +17,24 @@ cv::Vec2d EtalonClassifier::getFeatures(const cv::Mat& binaryImage)
 }
 
 void EtalonClassifier::computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels) {
-    for (size_t i = 0; i < trainingImages.size(); ++i) {
-        cv::Vec2d features = getFeatures(trainingImages[i]);
-        ethalons[labels[i]] += features;
+    numFeatures = 2; // We have F1 and F2
+
+    // Clear previous ethalons
+    ethalons.clear();
+
+    // Compute features for each training image
+    std::vector<cv::Vec2d> features;
+    for (const auto& image : trainingImages) {
+        features.push_back(getFeatures(image));
     }
 
+    // Compute ethalons
+    for (size_t i = 0; i < labels.size(); ++i) {
+        std::string label = labels[i];
+        ethalons[label] += features[i];
+    }
+
+    // Normalize ethalons
     for (auto& ethalon : ethalons) {
         ethalon.second /= static_cast<double>(std::count(labels.begin(), labels.end(), ethalon.first));
     }
@@ -97,62 +113,31 @@ std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
     }
 }
 
-double EtalonClassifier::computeArea(const cv::Mat& binaryImage) {
-    return cv::countNonZero(binaryImage);
-}
-
-double EtalonClassifier::computeF1(const cv::Mat& binaryImage) {
-    // Compute F1 as defined in your previous code
-    return (double)(computeCircumference(binaryImage) * computeCircumference(binaryImage)) / (100 * computeArea(binaryImage));
-}
-
-double EtalonClassifier::computeF2(const cv::Mat& binaryImage) {
-    // Compute F2 as defined in your previous code
-    cv::Moments moments = cv::moments(binaryImage);
-    double minMoment, maxMoment;
-    computeMinMaxMoments(moments, minMoment, maxMoment);
-    return minMoment / maxMoment;
-}
-
 cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
 {
-    std::cout << "Inside computeFeatures function" << std::endl; // Add this line for debugging
     double F1 = computeF1(binaryImage);
     double F2 = computeF2(binaryImage);
-    std::cout << "F1: " << F1 << ", F2: " << F2 << std::endl; // Print features for debugging
+    
+    // print F1 and F2
+    std::cout << "F1: " << F1 << ", F2: " << F2 << std::endl;
+
     return cv::Vec2d(F1, F2);
+}
+
+void EtalonClassifier::computeMinMaxFeatures(const std::vector<cv::Vec2d>& features, cv::Vec2d& minFeatures, cv::Vec2d& maxFeatures) {
+    minFeatures = cv::Vec2d(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+    maxFeatures = cv::Vec2d(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
+
+    for (const auto& feature : features) {
+        minFeatures[0] = std::min(minFeatures[0], feature[0]);
+        minFeatures[1] = std::min(minFeatures[1], feature[1]);
+        maxFeatures[0] = std::max(maxFeatures[0], feature[0]);
+        maxFeatures[1] = std::max(maxFeatures[1], feature[1]);
+    }
 }
 
 double EtalonClassifier::distance(const cv::Vec2d& v1, const cv::Vec2d& v2) {
     // Compute the Euclidean distance between two feature vectors
     cv::Vec2d diff = v1 - v2;
     return cv::norm(diff);
-}
-
-int EtalonClassifier::computeCircumference(const cv::Mat& binaryImage) {
-    // Compute the circumference as defined in your previous code
-    int circumference = 0;
-    for (int y = 1; y < binaryImage.rows - 1; ++y) {
-        for (int x = 1; x < binaryImage.cols - 1; ++x) {
-            if (binaryImage.at<uchar>(y, x) > 0) {
-                if (binaryImage.at<uchar>(y - 1, x) == 0 ||
-                    binaryImage.at<uchar>(y + 1, x) == 0 ||
-                    binaryImage.at<uchar>(y, x - 1) == 0 ||
-                    binaryImage.at<uchar>(y, x + 1) == 0) {
-                    circumference++;
-                }
-            }
-        }
-    }
-    return circumference;
-}
-
-void EtalonClassifier::computeMinMaxMoments(const cv::Moments& moments, double& minMoment, double& maxMoment) {
-    // Compute the minimum and maximum moments as defined in your previous code
-    double mu20 = moments.m20 / moments.m00;
-    double mu02 = moments.m02 / moments.m00;
-    double mu11 = moments.m11 / moments.m00;
-    double diff = sqrt(pow(mu20 - mu02, 2) + 4 * pow(mu11, 2));
-    maxMoment = 0.5 * (mu20 + mu02 + diff);
-    minMoment = 0.5 * (mu20 + mu02 - diff);
 }

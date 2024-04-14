@@ -1,3 +1,4 @@
+// EtalonClassifier.h
 #ifndef ETALONCLASSIFIER_H
 #define ETALONCLASSIFIER_H
 
@@ -16,13 +17,10 @@ public:
 
 private:
     std::map<std::string, cv::Vec2d> ethalons;
-    double computeArea(const cv::Mat& binaryImage);
-    double computeF1(const cv::Mat& binaryImage);
-    double computeF2(const cv::Mat& binaryImage);
-    cv::Vec2d computeFeatures(const cv::Mat& binaryImage);
+    int numFeatures; // Number of features (F1 and F2)
+    void computeMinMaxFeatures(const std::vector<cv::Vec2d>& features, cv::Vec2d& minFeatures, cv::Vec2d& maxFeatures);
     double distance(const cv::Vec2d& v1, const cv::Vec2d& v2);
-    int computeCircumference(const cv::Mat& binaryImage);
-    void computeMinMaxMoments(const cv::Moments& moments, double& minMoment, double& maxMoment);
+    cv::Vec2d computeFeatures(const cv::Mat& binaryImage);
 };
 
 #endif // ETALONCLASSIFIER_H

@@ -21,7 +21,9 @@ int main()
         return EXIT_FAILURE;
     }
 
-    processImage(testImageEthalon);
+    Exercise2(testImageEthalon);
+
+    //processImage(testImageEthalon);
 
     return EXIT_SUCCESS;
 }

@@ -2,6 +2,16 @@
 
 double computeArea(const cv::Mat& binaryImage)
 {
+    if (binaryImage.empty()) {
+        std::cerr << "Error: Input image is empty." << std::endl;
+        return 0.0;
+    }
+
+    if (binaryImage.type() != CV_8UC1) {
+        std::cerr << "Error: Input image is not a binary image (CV_8UC1 type required)." << std::endl;
+        return 0.0;
+    }
+
     return cv::countNonZero(binaryImage);
 }
 
@@ -49,15 +59,28 @@ double computeF1(const cv::Mat& binaryImage)
 
 double computeF2(const cv::Mat& binaryImage)
 {
+    // Check if the input image is empty
+    if (binaryImage.empty()) {
+        std::cerr << "Error: Input image is empty." << std::endl;
+        return 0.0;
+    }
+
+    // Check if the input image is not of type CV_8UC1
+    if (binaryImage.type() != CV_8UC1) {
+        std::cerr << "Error: Input image is not a binary image (CV_8UC1 type required)." << std::endl;
+        return 0.0;
+    }
+
     cv::Moments moments = cv::moments(binaryImage);
 
-	double minMoment, maxMoment;
-	computeMinMaxMoments(moments, minMoment, maxMoment);
+    double minMoment, maxMoment;
+    computeMinMaxMoments(moments, minMoment, maxMoment);
 
-	double F2 = minMoment / maxMoment;
+    double F2 = minMoment / maxMoment;
 
-	return F2;
+    return F2;
 }
+
 
 void computeFeatures(const cv::Mat& binaryImage, int imgIndex)
 {
