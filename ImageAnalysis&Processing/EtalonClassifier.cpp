@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iostream>
 
-
 EtalonClassifier::EtalonClassifier() {}
 
 EtalonClassifier::~EtalonClassifier() {}
@@ -120,39 +119,33 @@ std::string EtalonClassifier::classifyObject(const cv::Mat& testImage) {
 
 std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
 {
-    double F1 = computeF1(binaryImage);
-    double F2 = computeF2(binaryImage);
+    // Compute features for the binary image
+    cv::Vec2d features;
+    computeFeatures(binaryImage, -1, &features);
 
-    // Check the aspect ratios to classify the shape
-    double aspectRatio = std::min(F1, F2) / std::max(F1, F2);
-    if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
-        return "square";
+    // Initialize variables to keep track of the closest ethalon and its distance
+    double minDistance = std::numeric_limits<double>::max(); // Initialize minDistance
+    std::string closestLabel;
+
+    // Iterate over each ethalon and find the closest one
+    for (const auto& ethalon : ethalons) {
+        // Compute the distance between the test features and the ethalon
+        double d = distance(features, ethalon.second);
+
+        // Check if this ethalon is closer than the current closest one
+        if (d < minDistance) {
+            minDistance = d;
+            closestLabel = ethalon.first;
+        }
     }
-    else if (aspectRatio >= 0.5 && aspectRatio <= 2.0) {
-        return "rectangle";
-    }
-    else if (aspectRatio >= 0.2 && aspectRatio <= 0.5) {
-        return "star";
-    }
-    else {
-        return "unknown";
-    }
+
+    // Return the label of the closest ethalon
+    return closestLabel;
 }
 
 const std::map<std::string, cv::Vec2d>& EtalonClassifier::getEthalons() const
 {
     return ethalons;
-}
-
-cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
-{
-    double F1 = computeF1(binaryImage);
-    double F2 = computeF2(binaryImage);
-
-    // print F1 and F2
-    std::cout << "F1: " << F1 << ", F2: " << F2 << std::endl;
-
-    return cv::Vec2d(F1, F2);
 }
 
 void EtalonClassifier::computeMinMaxFeatures(const std::vector<cv::Vec2d>& features, cv::Vec2d& minFeatures, cv::Vec2d& maxFeatures) {
@@ -171,4 +164,39 @@ double EtalonClassifier::distance(const cv::Vec2d& v1, const cv::Vec2d& v2) {
     // Compute the Euclidean distance between two feature vectors
     cv::Vec2d diff = v1 - v2;
     return cv::norm(diff);
+}
+
+cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage, int imgIndex, cv::Vec2d* features)
+{
+    if (features == nullptr) {
+        // Compute features for the binary image
+        int numCorners = computeNumberOfCorners(binaryImage);
+        cv::Moments moments = cv::moments(binaryImage);
+
+        double area = computeArea(binaryImage);
+        cv::Point2d centerOfMass = computeCenterOfMass(moments);
+        int circumference = computeCircumference(binaryImage);
+
+        double minMoment, maxMoment;
+        computeMinMaxMoments(moments, minMoment, maxMoment);
+
+        double F1 = (double)(circumference * circumference) / (100 * area);
+        double F2 = minMoment / maxMoment;
+
+        std::cout << "--------------------------------------------------" << std::endl;
+        std::cout << "OBJ-" << imgIndex << std::endl;
+        std::cout << "Number of Corners: " << numCorners << std::endl;
+        std::cout << "Area: " << area << std::endl;
+        std::cout << "Center of Mass (x_t, y_t): [" << centerOfMass.x << ", " << centerOfMass.y << "]" << std::endl;
+        std::cout << "Circumference: " << circumference << std::endl;
+        std::cout << "F1: " << F1 << std::endl;
+        std::cout << "F2: " << F2 << std::endl;
+        std::cout << "--------------------------------------------------" << std::endl;
+
+        return cv::Vec2d(numCorners, F2);
+    }
+    else {
+        // Use the provided features
+        return *features;
+    }
 }

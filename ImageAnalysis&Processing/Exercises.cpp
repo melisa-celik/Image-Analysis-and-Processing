@@ -303,22 +303,13 @@ void Exercise3(const cv::Mat& image)
 		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
 		// Compute features for the object
-		cv::Vec2d objectFeature = classifier.getFeatures(mask);
+		cv::Vec2d objectFeature;
+		computeFeatures(mask, static_cast<int>(i + 1), objectFeature);
 		objectFeatures.push_back(objectFeature);
 
 		// Assign a unique label to each object
 		labels.push_back("OBJ-" + std::to_string(i));
-
-		// Debugging: Print computed features for each object
-		std::cout << "Features for OBJ-" << i + 1 << ": F1 = " << objectFeature[0] << ", F2 = " << objectFeature[1] << std::endl << std::endl;
 	}
-
-	// Debugging: Print computed ethalons
-	std::cout << "Ethalons:" << std::endl;
-	for (const auto& ethalon : classifier.getEthalons()) {
-		std::cout << "Label: " << ethalon.first << ", F1 = " << ethalon.second[0] << ", F2 = " << ethalon.second[1] << std::endl;
-	}
-
 
 	// Compute ethalons for each class
 	classifier.computeEthalons(objectFeatures, labels);

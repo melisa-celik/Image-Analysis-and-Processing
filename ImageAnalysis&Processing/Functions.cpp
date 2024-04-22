@@ -81,8 +81,9 @@ double computeF2(const cv::Mat& binaryImage)
     return F2;
 }
 
-void computeFeatures(const cv::Mat& binaryImage, int imgIndex)
+void computeFeatures(const cv::Mat& binaryImage, int imgIndex, cv::Vec2d& features)
 {
+    int numCorners = computeNumberOfCorners(binaryImage);
     cv::Moments moments = cv::moments(binaryImage);
 
     double area = computeArea(binaryImage);
@@ -95,12 +96,32 @@ void computeFeatures(const cv::Mat& binaryImage, int imgIndex)
     double F1 = (double)(circumference * circumference) / (100 * area);
     double F2 = minMoment / maxMoment;
 
-    std::cout << "---------------------------------------------" << std::endl;
-    std::cout << "Img" << imgIndex << std::endl;
+    std::cout << "--------------------------------------------------" << std::endl;
+    std::cout << "OBJ-" << imgIndex << std::endl;
+    std::cout << "Number of Corners: " << numCorners << std::endl;
     std::cout << "Area: " << area << std::endl;
     std::cout << "Center of Mass (x_t, y_t): [" << centerOfMass.x << ", " << centerOfMass.y << "]" << std::endl;
     std::cout << "Circumference: " << circumference << std::endl;
     std::cout << "F1: " << F1 << std::endl;
     std::cout << "F2: " << F2 << std::endl;
-    std::cout << "---------------------------------------------" << std::endl;
+    std::cout << "--------------------------------------------------" << std::endl;
+
+    features = cv::Vec2d(numCorners, 0.0); 
+}
+
+int computeNumberOfCorners(const cv::Mat& binaryImage)
+{
+    // Find contours
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    // Calculate number of corners using contour approximation
+    int numCorners = 0;
+    for (const auto& contour : contours) {
+        std::vector<cv::Point> approxCurve;
+        cv::approxPolyDP(contour, approxCurve, cv::arcLength(contour, true) * 0.02, true);
+        numCorners += approxCurve.size();
+    }
+
+    return numCorners;
 }
