@@ -310,7 +310,7 @@ void Exercise3(const cv::Mat& image)
 		labels.push_back("OBJ-" + std::to_string(i));
 
 		// Debugging: Print computed features for each object
-		std::cout << "Features for OBJ-" << i << ": F1 = " << objectFeature[0] << ", F2 = " << objectFeature[1] << std::endl << std::endl;
+		std::cout << "Features for OBJ-" << i + 1 << ": F1 = " << objectFeature[0] << ", F2 = " << objectFeature[1] << std::endl << std::endl;
 	}
 
 	// Debugging: Print computed ethalons
@@ -341,19 +341,19 @@ void Exercise3(const cv::Mat& image)
 		// Colorize the object based on its shape classification
 		if (shape == "square") {
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(255, 0, 0), cv::FILLED);
-			std::cout << "Object OBJ-" << i << " is classified as a square." << std::endl;
+			std::cout << "Object OBJ-" << i + 1 << " is classified as a square." << std::endl;
 		}
 		else if (shape == "rectangle") {
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 0), cv::FILLED);
-			std::cout << "Object OBJ-" << i << " is classified as a rectangle." << std::endl;
+			std::cout << "Object OBJ-" << i + 1 << " is classified as a rectangle." << std::endl;
 		}
 		else if (shape == "star") {
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 255), cv::FILLED);
-			std::cout << "Object OBJ-" << i << " is classified as a star." << std::endl;
+			std::cout << "Object OBJ-" << i + 1 << " is classified as a star." << std::endl;
 		}
 		else {
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
-			std::cout << "Object OBJ-" << i << " is classified as an unknown object." << std::endl;
+			std::cout << "Object OBJ-" << i + 1 << " is classified as an unknown object." << std::endl;
 		}
 	}
 
@@ -363,7 +363,6 @@ void Exercise3(const cv::Mat& image)
 	cv::imshow("Result", widenedImage);
 	cv::waitKey(0);
 }
-
 
 
 //void Exercise3(const cv::Mat& image)

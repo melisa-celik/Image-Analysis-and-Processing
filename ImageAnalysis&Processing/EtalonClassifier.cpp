@@ -144,13 +144,11 @@ const std::map<std::string, cv::Vec2d>& EtalonClassifier::getEthalons() const
     return ethalons;
 }
 
-
-
 cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
 {
     double F1 = computeF1(binaryImage);
     double F2 = computeF2(binaryImage);
-    
+
     // print F1 and F2
     std::cout << "F1: " << F1 << ", F2: " << F2 << std::endl;
 
