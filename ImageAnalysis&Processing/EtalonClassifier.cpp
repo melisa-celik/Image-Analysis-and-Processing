@@ -77,41 +77,60 @@ void EtalonClassifier::loadEthalons(const std::string& filename) {
 }
 
 std::string EtalonClassifier::classifyObject(const cv::Mat& testImage) {
+    // Compute features for the test image
     cv::Vec2d testFeatures = getFeatures(testImage);
+
+    // Initialize variables to keep track of the closest ethalon and its distance
     double minDistance = std::numeric_limits<double>::max();
     std::string closestLabel;
 
+    // Iterate over each ethalon and find the closest one
     for (const auto& ethalon : ethalons) {
+        // Compute the distance between the test features and the ethalon
         double d = distance(testFeatures, ethalon.second);
+
+        // Check if this ethalon is closer than the current closest one
         if (d < minDistance) {
             minDistance = d;
             closestLabel = ethalon.first;
         }
     }
 
+    // Return the label of the closest ethalon
     return closestLabel;
 }
 
+
+//std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
+//{
+//    double F1 = computeF1(binaryImage);
+//    double F2 = computeF2(binaryImage);
+//
+//    // Check the aspect ratios to classify the shape
+//    double aspectRatio = std::min(F1, F2) / std::max(F1, F2);
+//    if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
+//        return "square";
+//    }
+//    else if (aspectRatio >= 0.5 && aspectRatio <= 2.0) {
+//        return "rectangle";
+//    }
+//    else if (aspectRatio >= 0.2 && aspectRatio <= 0.5) {
+//        return "star";
+//    }
+//    else {
+//        return "unknown";
+//    }
+//}
+
 std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
 {
-    double F1 = computeF1(binaryImage);
-    double F2 = computeF2(binaryImage);
+    // Classify the object using the EtalonClassifier
+    std::string shape = classifyObject(binaryImage);
 
-    // Check the aspect ratios to classify the shape
-    double aspectRatio = std::min(F1, F2) / std::max(F1, F2);
-    if (aspectRatio > 0.9 && aspectRatio < 1.1) {
-        return "square";
-    }
-    else if (aspectRatio > 0.5 && aspectRatio < 2.0) {
-        return "rectangle";
-    }
-    else if (aspectRatio > 0.2 && aspectRatio < 0.5) {
-        return "star";
-    }
-    else {
-        return "unknown";
-    }
+    // Return the shape classification result
+    return shape;
 }
+
 
 cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
 {

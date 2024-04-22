@@ -157,8 +157,16 @@ void Exercise2(const cv::Mat& image)
 		cv::putText(image, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 
-		// Compute additional features
-		computeFeatures(mask, i + 1);
+		// Colorize the object based on its shape classification
+		if (shape == "square") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(255, 0, 0), cv::FILLED);
+		}
+		else if (shape == "rectangle") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 0), cv::FILLED);
+		}
+		else if (shape == "star") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
+		}
 	}
 
 	// Display the result
@@ -168,44 +176,134 @@ void Exercise2(const cv::Mat& image)
 	cv::waitKey(0);
 }
 
-
-
 void Exercise3(const cv::Mat& image)
 {
 	// Check if the input image is empty
 	if (image.empty()) {
-		std::cerr << "Error: Input image is empty." << std::endl;
+		std::cerr << "Error: Couldn't load the binary image." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-	// Print the type of the input image
-	std::cout << "Input image type: " << image.type() << std::endl;
+	// Convert the image to grayscale
+	cv::Mat grayscaleImage;
+	cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
 
-	// Display the input image
-	cv::imshow("Input Image", image);
+	// Threshold the grayscale image
+	cv::Mat binaryImage;
+	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
+
+	// Initialize the EtalonClassifier
+	EtalonClassifier classifier;
+
+	// Prepare training images and corresponding labels
+	std::vector<cv::Mat> trainingImages;
+	std::vector<std::string> labels;
+
+	// Compute features for each object in the image
+	std::vector<cv::Vec2d> objectFeatures;
+
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	for (size_t i = 0; i < contours.size(); ++i) {
+		// Convert contour to a binary mask
+		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
+		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
+
+		// Compute features for the object
+		cv::Vec2d objectFeature = classifier.getFeatures(mask);
+		objectFeatures.push_back(objectFeature);
+
+		// Assign a unique label to each object
+		labels.push_back("object_" + std::to_string(i));
+	}
+
+	// Compute ethalons for each class
+	classifier.computeEthalons(objectFeatures, labels);
+
+	// Save ethalons
+	classifier.saveEthalons("ethalons.dat");
+
+	// Classify objects in the test image
+	for (size_t i = 0; i < contours.size(); ++i) {
+		// Convert contour to a binary mask
+		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
+		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
+
+		// Classify the shape using the EtalonClassifier
+		std::string shape = classifier.classifyShape(mask);
+
+		// Draw contour on the original image
+		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
+
+		// Compute area and circumference of the contour
+		double area = computeArea(mask);
+		int circumference = computeCircumference(mask);
+
+		// Compute bounding box and center
+		cv::Rect bbox = cv::boundingRect(contours[i]);
+		cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+
+		// Add shape label to the image
+		cv::putText(image, shape, center, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+
+		// Colorize the object based on its shape classification
+		if (shape == "square") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(255, 0, 0), cv::FILLED);
+		}
+		else if (shape == "rectangle") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 0), cv::FILLED);
+		}
+		else if (shape == "star") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
+		}
+	}
+
+	// Display the result
+	cv::Mat widenedImage;
+	cv::copyMakeBorder(image, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
+	cv::imshow("Result", widenedImage);
 	cv::waitKey(0);
-
-	// Check if the input image is of type CV_8UC1 (single-channel 8-bit)
-	if (image.type() != CV_8UC1) {
-		// Convert the input image to grayscale
-		cv::Mat grayscaleImage;
-		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
-
-		// Print the type of the grayscale image
-		std::cout << "Grayscale image type: " << grayscaleImage.type() << std::endl;
-
-		// Display the grayscale image
-		cv::imshow("Grayscale Image", grayscaleImage);
-		cv::waitKey(0);
-
-		// Continue with the grayscale image
-		processImage(grayscaleImage);
-	}
-	else {
-		// Continue with the original input image
-		processImage(image);
-	}
 }
+
+//void Exercise3(const cv::Mat& image)
+//{
+//	// Check if the input image is empty
+//	if (image.empty()) {
+//		std::cerr << "Error: Input image is empty." << std::endl;
+//		exit(EXIT_FAILURE);
+//	}
+//
+//	// Print the type of the input image
+//	std::cout << "Input image type: " << image.type() << std::endl;
+//
+//	// Display the input image
+//	cv::imshow("Input Image", image);
+//	cv::waitKey(0);
+//
+//	// Check if the input image is of type CV_8UC1 (single-channel 8-bit)
+//	if (image.type() != CV_8UC1) {
+//		// Convert the input image to grayscale
+//		cv::Mat grayscaleImage;
+//		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
+//
+//		// Print the type of the grayscale image
+//		std::cout << "Grayscale image type: " << grayscaleImage.type() << std::endl;
+//
+//		// Display the grayscale image
+//		cv::imshow("Grayscale Image", grayscaleImage);
+//		cv::waitKey(0);
+//
+//		// Continue with the grayscale image
+//		processImage(grayscaleImage);
+//	}
+//	else {
+//		// Continue with the original input image
+//		processImage(image);
+//	}
+//}
 
 //void processImage(const cv::Mat& image)
 //{
