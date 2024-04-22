@@ -9,7 +9,7 @@ public:
     EtalonClassifier();
     ~EtalonClassifier();
     cv::Vec2d getFeatures(const cv::Mat& binaryImage);
-    void computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels);
+    void computeEthalons(const std::vector<cv::Vec2d>& features, const std::vector<std::string>& labels);
     void saveEthalons(const std::string& filename);
     void loadEthalons(const std::string& filename);
     std::string classifyObject(const cv::Mat& testImage);

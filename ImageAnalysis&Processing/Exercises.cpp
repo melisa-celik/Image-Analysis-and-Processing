@@ -127,7 +127,7 @@ void Exercise2(const cv::Mat& image)
 	};
 
 	// Compute ethalons for each class
-	classifier.computeEthalons(trainingImages, labels);
+	//classifier.computeEthalons(trainingImages, labels);
 
 	// Classify each object in the image
 	std::vector<std::vector<cv::Point>> contours;
@@ -215,7 +215,7 @@ void Exercise3(const cv::Mat& image)
 		objectFeatures.push_back(objectFeature);
 
 		// Assign a unique label to each object
-		labels.push_back("object_" + std::to_string(i));
+		labels.push_back("OBJ-" + std::to_string(i));
 	}
 
 	// Compute ethalons for each class
@@ -420,7 +420,7 @@ void processImage(const cv::Mat& image)
 	std::vector<std::string> labels = { "square", "rectangle", "star" };
 
 	// Compute ethalons
-	classifier.computeEthalons(trainingImages, labels);
+	//classifier.computeEthalons(trainingImages, labels);
 
 	// Save ethalons to a file
 	classifier.saveEthalons("ethalons.yml");

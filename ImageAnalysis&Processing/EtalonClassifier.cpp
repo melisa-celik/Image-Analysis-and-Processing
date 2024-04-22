@@ -16,17 +16,11 @@ cv::Vec2d EtalonClassifier::getFeatures(const cv::Mat& binaryImage)
     return computeFeatures(binaryImage);
 }
 
-void EtalonClassifier::computeEthalons(const std::vector<cv::Mat>& trainingImages, const std::vector<std::string>& labels) {
+void EtalonClassifier::computeEthalons(const std::vector<cv::Vec2d>& features, const std::vector<std::string>& labels) {
     numFeatures = 2; // We have F1 and F2
 
     // Clear previous ethalons
     ethalons.clear();
-
-    // Compute features for each training image
-    std::vector<cv::Vec2d> features;
-    for (const auto& image : trainingImages) {
-        features.push_back(getFeatures(image));
-    }
 
     // Compute ethalons
     for (size_t i = 0; i < labels.size(); ++i) {
@@ -39,6 +33,7 @@ void EtalonClassifier::computeEthalons(const std::vector<cv::Mat>& trainingImage
         ethalon.second /= static_cast<double>(std::count(labels.begin(), labels.end(), ethalon.first));
     }
 }
+
 
 void EtalonClassifier::saveEthalons(const std::string& filename) {
     std::ofstream file(filename, std::ios::binary);
