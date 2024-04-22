@@ -81,7 +81,6 @@ double computeF2(const cv::Mat& binaryImage)
     return F2;
 }
 
-
 void computeFeatures(const cv::Mat& binaryImage, int imgIndex)
 {
     cv::Moments moments = cv::moments(binaryImage);

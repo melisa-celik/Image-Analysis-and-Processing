@@ -1,10 +1,10 @@
-// EtalonClassifier.cpp
 #include "EtalonClassifier.h"
 #include <algorithm>
 #include <limits>
 #include "Functions.h"
 #include <fstream>
 #include <iostream>
+
 
 EtalonClassifier::EtalonClassifier() {}
 
@@ -139,6 +139,11 @@ std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
     }
 }
 
+const std::map<std::string, cv::Vec2d>& EtalonClassifier::getEthalons() const
+{
+    return ethalons;
+}
+
 
 
 cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
@@ -147,7 +152,7 @@ cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
     double F2 = computeF2(binaryImage);
     
     // print F1 and F2
-    std::cout << std::endl << "F1: " << F1 << ", F2: " << F2 << std::endl;
+    std::cout << "F1: " << F1 << ", F2: " << F2 << std::endl;
 
     return cv::Vec2d(F1, F2);
 }

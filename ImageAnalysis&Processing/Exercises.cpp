@@ -308,7 +308,17 @@ void Exercise3(const cv::Mat& image)
 
 		// Assign a unique label to each object
 		labels.push_back("OBJ-" + std::to_string(i));
+
+		// Debugging: Print computed features for each object
+		std::cout << "Features for OBJ-" << i << ": F1 = " << objectFeature[0] << ", F2 = " << objectFeature[1] << std::endl << std::endl;
 	}
+
+	// Debugging: Print computed ethalons
+	std::cout << "Ethalons:" << std::endl;
+	for (const auto& ethalon : classifier.getEthalons()) {
+		std::cout << "Label: " << ethalon.first << ", F1 = " << ethalon.second[0] << ", F2 = " << ethalon.second[1] << std::endl;
+	}
+
 
 	// Compute ethalons for each class
 	classifier.computeEthalons(objectFeatures, labels);
@@ -323,7 +333,7 @@ void Exercise3(const cv::Mat& image)
 		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
 		// Classify the shape using the EtalonClassifier
-		std::string shape = classifier.classifyObject(mask);
+		std::string shape = classifier.classifyShape(mask);
 
 		// Draw contour on the original image
 		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
@@ -353,6 +363,7 @@ void Exercise3(const cv::Mat& image)
 	cv::imshow("Result", widenedImage);
 	cv::waitKey(0);
 }
+
 
 
 //void Exercise3(const cv::Mat& image)

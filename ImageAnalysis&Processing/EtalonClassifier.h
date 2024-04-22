@@ -14,6 +14,7 @@ public:
     void loadEthalons(const std::string& filename);
     std::string classifyObject(const cv::Mat& testImage);
     std::string classifyShape(const cv::Mat& binaryImage);
+    const std::map<std::string, cv::Vec2d>& getEthalons() const; 
 
 private:
     std::map<std::string, cv::Vec2d> ethalons;
