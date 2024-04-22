@@ -68,6 +68,7 @@ void EtalonClassifier::loadEthalons(const std::string& filename) {
     }
     else {
         std::cerr << "Failed to open file for reading: " << filename << std::endl;
+        return; // Add return statement to exit function
     }
 }
 
@@ -76,7 +77,7 @@ std::string EtalonClassifier::classifyObject(const cv::Mat& testImage) {
     cv::Vec2d testFeatures = getFeatures(testImage);
 
     // Initialize variables to keep track of the closest ethalon and its distance
-    double minDistance = std::numeric_limits<double>::max();
+    double minDistance = std::numeric_limits<double>::max(); // Initialize minDistance
     std::string closestLabel;
 
     // Iterate over each ethalon and find the closest one
@@ -119,12 +120,25 @@ std::string EtalonClassifier::classifyObject(const cv::Mat& testImage) {
 
 std::string EtalonClassifier::classifyShape(const cv::Mat& binaryImage)
 {
-    // Classify the object using the EtalonClassifier
-    std::string shape = classifyObject(binaryImage);
+    double F1 = computeF1(binaryImage);
+    double F2 = computeF2(binaryImage);
 
-    // Return the shape classification result
-    return shape;
+    // Check the aspect ratios to classify the shape
+    double aspectRatio = std::min(F1, F2) / std::max(F1, F2);
+    if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
+        return "square";
+    }
+    else if (aspectRatio >= 0.5 && aspectRatio <= 2.0) {
+        return "rectangle";
+    }
+    else if (aspectRatio >= 0.2 && aspectRatio <= 0.5) {
+        return "star";
+    }
+    else {
+        return "unknown";
+    }
 }
+
 
 
 cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
@@ -133,7 +147,7 @@ cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage)
     double F2 = computeF2(binaryImage);
     
     // print F1 and F2
-    std::cout << "F1: " << F1 << ", F2: " << F2 << std::endl;
+    std::cout << std::endl << "F1: " << F1 << ", F2: " << F2 << std::endl;
 
     return cv::Vec2d(F1, F2);
 }
