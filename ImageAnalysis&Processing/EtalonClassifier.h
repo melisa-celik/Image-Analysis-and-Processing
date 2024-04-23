@@ -21,7 +21,6 @@ private:
     void computeMinMaxFeatures(const std::vector<cv::Vec2d>& features, cv::Vec2d& minFeatures, cv::Vec2d& maxFeatures);
     double distance(const cv::Vec2d& v1, const cv::Vec2d& v2);
     cv::Vec2d computeFeatures(const cv::Mat& binaryImage, int imgIndex = -1, cv::Vec2d* features = nullptr);
-    cv::Vec2d computeFeatures(const cv::Mat& binaryImage, int imgIndex, cv::Vec2d* features);
 };
 
 #endif // ETALONCLASSIFIER_H
