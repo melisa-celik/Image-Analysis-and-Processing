@@ -304,28 +304,32 @@ void Exercise3(const cv::Mat& image)
 
 	// Iterate over each detected contour (object)
 	for (size_t i = 0; i < contours.size(); ++i) {
-		// Convert contour to a binary mask
+		// Extract the current contour (object)
+		std::vector<cv::Point> currentContour = contours[i];
+
+		// Create a binary mask for the current contour
 		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
 		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
 		// Classify the shape using the Etalon classifier
 		std::string shape = classifier.classifyObject(mask);
 
+		// Compute area and circumference of the contour
+		double area = cv::contourArea(currentContour);
+		double circumference = cv::arcLength(currentContour, true);
+
 		// Draw contour on the original image
 		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
 
-		// Compute area and circumference of the contour
-		double area = cv::contourArea(contours[i]);
-		double circumference = cv::arcLength(contours[i], true);
-
 		// Compute bounding box and center
-		cv::Rect bbox = cv::boundingRect(contours[i]);
+		cv::Rect bbox = cv::boundingRect(currentContour);
 		cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
 
-		// Add shape label to the image
-		cv::putText(image, shape, center, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-		cv::putText(image, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		// Add shape label, object index, area, and circumference to the image
+		std::string objectText = "Object " + std::to_string(i + 1) + ": " + shape;
+		cv::putText(image, objectText, cv::Point(bbox.x, bbox.y - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Area: " + std::to_string(area), cv::Point(bbox.x, bbox.y + bbox.height + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(bbox.x, bbox.y + bbox.height + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 
 		// Colorize the object based on its shape classification
 		if (shape == "square") {
@@ -337,6 +341,9 @@ void Exercise3(const cv::Mat& image)
 		else if (shape == "star") {
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
 		}
+
+		// Clear the classifier state for the next contour
+		classifier = Etalon(); // Reset the classifier for the next object
 	}
 
 	// Display the result
@@ -345,6 +352,7 @@ void Exercise3(const cv::Mat& image)
 	cv::imshow("Shape Classification Result", widenedImage);
 	cv::waitKey(0);
 }
+
 
 
 //void Exercise3(const cv::Mat& image)
