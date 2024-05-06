@@ -60,45 +60,6 @@ void Exercise1(const cv::Mat& image)
 	// wait until keypressed
 }
 
-//void Exercise2(const cv::Mat& image)
-//{
-//	if (image.empty()) {
-//		std::cerr << "Error: Couldn't load the binary image." << std::endl;
-//		exit(EXIT_FAILURE);
-//	}
-//
-//	cv::threshold(image, image, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-//
-//	std::vector<std::vector<cv::Point>> contours;
-//	cv::findContours(image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-//
-//	for (size_t i = 0; i < contours.size(); ++i) {
-//		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
-//		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
-//
-//		double area = computeArea(mask);
-//		int circumference = computeCircumference(mask);
-//
-//		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
-//
-//		cv::Rect bbox = cv::boundingRect(contours[i]);
-//
-//		cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
-//
-//		cv::putText(image, "Img" + std::to_string(i + 1), center, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-//		cv::putText(image, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-//		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-//
-//		computeFeatures(mask, i + 1);
-//	}
-//
-//	cv::Mat widenedImage;
-//	cv::copyMakeBorder(image, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
-//
-//	cv::imshow("Result", widenedImage);
-//	cv::waitKey(0);
-//}
-
 void Exercise2(const cv::Mat& image)
 {
 	// Check if the input image is empty
@@ -192,7 +153,6 @@ void Exercise3(const cv::Mat& image)
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	// Initialize the Etalon classifier
 	Etalon classifier;
 
 	// Prepare training images and corresponding labels for the Etalon classifier
@@ -203,45 +163,34 @@ void Exercise3(const cv::Mat& image)
 	};
 	std::vector<std::string> labels = { "square", "rectangle", "star" };
 
-	// Compute ethalons for each class using the training images and labels
 	classifier.computeEthalons(trainingImages, labels);
 
-	// Find contours in the binary image
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-	// Iterate over each detected contour (object)
 	for (size_t i = 0; i < contours.size(); ++i) {
-		// Extract the current contour (object)
 		std::vector<cv::Point> currentContour = contours[i];
 
-		// Create a binary mask for the current contour
 		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
 		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
-		// Classify the shape using the Etalon classifier
 		std::string shape = classifier.classifyObject(mask);
 
 		std::cout << "Shape classification: " << shape << std::endl;
 
-		// Compute area and circumference of the contour
 		double area = cv::contourArea(currentContour);
 		double circumference = cv::arcLength(currentContour, true);
 
-		// Draw contour on the original image
 		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
 
-		// Compute bounding box and center
 		cv::Rect bbox = cv::boundingRect(currentContour);
 		cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
 
-		// Add shape label, object index, area, and circumference to the image
 		std::string objectText = "Object " + std::to_string(i + 1) + ": " + shape;
 		cv::putText(image, objectText, cv::Point(bbox.x, bbox.y - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255), 1, cv::LINE_AA);
 		//cv::putText(image, "Area: " + std::to_string(area), cv::Point(bbox.x, bbox.y + bbox.height + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 		//cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(bbox.x, bbox.y + bbox.height + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 
-		// Colorize the object based on its shape classification
 		if (shape == "square") {
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(255, 0, 0), cv::FILLED);
 		}
@@ -252,196 +201,12 @@ void Exercise3(const cv::Mat& image)
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
 		}
 
-		// Display the result with updated contours and annotations
 		cv::imshow("Shape Classification Result", image);
-		cv::waitKey(1000); // Pause briefly to display each object before processing the next one
+		cv::waitKey(1000); 
 
-		// Clear the binary mask to prepare for the next contour
 		mask.setTo(0);
 	}
 
-	// Final display of the result
 	cv::imshow("Final Result", image);
 	cv::waitKey(0);
 }
-
-
-
-
-
-//void Exercise3(const cv::Mat& image)
-//{
-//	// Check if the input image is empty
-//	if (image.empty()) {
-//		std::cerr << "Error: Input image is empty." << std::endl;
-//		exit(EXIT_FAILURE);
-//	}
-//
-//	// Print the type of the input image
-//	std::cout << "Input image type: " << image.type() << std::endl;
-//
-//	// Display the input image
-//	cv::imshow("Input Image", image);
-//	cv::waitKey(0);
-//
-//	// Check if the input image is of type CV_8UC1 (single-channel 8-bit)
-//	if (image.type() != CV_8UC1) {
-//		// Convert the input image to grayscale
-//		cv::Mat grayscaleImage;
-//		cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
-//
-//		// Print the type of the grayscale image
-//		std::cout << "Grayscale image type: " << grayscaleImage.type() << std::endl;
-//
-//		// Display the grayscale image
-//		cv::imshow("Grayscale Image", grayscaleImage);
-//		cv::waitKey(0);
-//
-//		// Continue with the grayscale image
-//		processImage(grayscaleImage);
-//	}
-//	else {
-//		// Continue with the original input image
-//		processImage(image);
-//	}
-//}
-
-//void processImage(const cv::Mat& image)
-//{
-//	// In Exercise 3, we will use the EtalonClassifier class to classify objects in the image.
-//
-//	// Load the test image
-//	cv::Mat testImage = image;
-//
-//	// Load the training images
-//	std::vector<cv::Mat> trainingImages;
-//	std::vector<std::string> labels;  // Add this line
-//
-//	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png", cv::IMREAD_GRAYSCALE));
-//	labels.push_back("square"); 
-//	labels.push_back("rectangle");
-//	labels.push_back("star");
-//
-//	// Create an instance of the EtalonClassifier class
-//	EtalonClassifier classifier;
-//
-//	// Compute the ethalons
-//	classifier.computeEthalons(trainingImages, labels);  // Provide both trainingImages and labels
-//
-//	// Classify the object in the test image
-//	std::string result = classifier.classifyObject(testImage);
-//
-//	// Print the result
-//	std::cout << "Classified object as: " << result << std::endl;
-//
-//	// Display the test image
-//	cv::imshow("Test Image", testImage);
-//	cv::waitKey(0);
-//}
-
-void detectAndColorizeObjects(cv::Mat& image, EtalonClassifier& classifier)
-{
-	// Convert the image to grayscale
-	cv::Mat grayscaleImage;
-	cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
-
-	// Threshold the grayscale image
-	cv::Mat binaryImage;
-	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
-
-	// Classify objects in the binary image
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-	// Iterate through each contour and classify the shape
-	for (const auto& contour : contours) {
-		// Convert contour to a binary mask
-		cv::Mat mask = cv::Mat::zeros(binaryImage.size(), CV_8UC1);
-		cv::drawContours(mask, std::vector<std::vector<cv::Point>>(1, contour), -1, cv::Scalar(255), cv::FILLED);
-
-		// Compute the bounding box of the contour
-		cv::Rect bbox = cv::boundingRect(contour);
-
-		// Compute the aspect ratio of the bounding box
-		double aspectRatio = (double)bbox.width / bbox.height;
-
-		// Skip the contour if the aspect ratio is too large or too small
-		if (aspectRatio > 2.0 || aspectRatio < 0.5) {
-			continue;
-		}
-
-		// Compute the features of the contour
-		cv::Vec2d features = classifier.getFeatures(mask);
-
-
-		// Compute the distance to the ethalons
-		double minDistance = std::numeric_limits<double>::max();
-
-		// Classify the shape
-		std::string shape = classifier.classifyShape(mask);
-
-		// Colorize the contour based on its shape
-		cv::Scalar color;
-		if (shape == "square") {
-			color = cv::Scalar(255, 0, 0); // Blue
-		}
-		else if (shape == "rectangle") {
-			color = cv::Scalar(0, 255, 0); // Green
-		}
-		else if (shape == "star") {
-			color = cv::Scalar(0, 0, 255); // Red
-		}
-		else {
-			// Unknown shape
-			continue;
-		}
-
-		// Draw the contour with the identified shape color
-		cv::drawContours(image, std::vector<std::vector<cv::Point>>(1, contour), -1, color, 2);
-	}
-
-	// Display the result
-	cv::imshow("Result", image);
-	cv::waitKey(0);
-}
-
-
-
-void processImage(const cv::Mat& image)
-{
-	// Create an instance of the EtalonClassifier class
-	EtalonClassifier classifier;
-
-	// Load the training images and labels
-	std::vector<cv::Mat> trainingImages;
-	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\square.png", cv::IMREAD_GRAYSCALE));
-	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\rectangle.jpg", cv::IMREAD_GRAYSCALE));
-	trainingImages.push_back(cv::imread("C:\\Users\\Lenovo\\Downloads\\star-red.jpg", cv::IMREAD_GRAYSCALE));
-
-	std::vector<std::string> labels = { "square", "rectangle", "star" };
-
-	// Compute ethalons
-	//classifier.computeEthalons(trainingImages, labels);
-
-	// Save ethalons to a file
-	classifier.saveEthalons("ethalons.yml");
-
-	// Load ethalons from a file
-	classifier.loadEthalons("ethalons.yml");
-
-	// Classify the shape of the test 
-
-	// Detect and colorize objects in the test image
-	cv::Mat testImage = image.clone();
-	detectAndColorizeObjects(testImage, classifier);
-
-	// Classify objects using ethalons
-	std::string result = classifier.classifyObject(testImage);
-	std::cout << "Classified object: " << result << std::endl;
-
-	// Display the result
-	//cv::imshow("Result", testImage);
-	cv::waitKey(0);
-}
-
-

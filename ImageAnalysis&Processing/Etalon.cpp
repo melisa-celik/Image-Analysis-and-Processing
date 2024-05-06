@@ -55,32 +55,6 @@ std::string Etalon::classifyObject(const cv::Mat& testImage)
     return closestLabel;
 }
 
-//cv::Vec2d Etalon::computeFeatures(const cv::Mat& binaryImage)
-//{
-//    // Find contours in the binary image
-//    std::vector<std::vector<cv::Point>> contours;
-//    cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-//
-//    // Calculate area using image moments
-//    cv::Moments moments = cv::moments(binaryImage, true);
-//    double area = moments.m00;
-//
-//    // Calculate perimeter (arc length) from the largest contour
-//    double perimeter = 0.0;
-//    if (!contours.empty()) {
-//        perimeter = cv::arcLength(contours[0], true);
-//    }
-//
-//    // Debug prints
-//    std::cout << "Area: " << area << ", Perimeter: " << perimeter << std::endl;
-//
-//    // Define your features (adjust as needed)
-//    double F1 = area;       // Area feature
-//    double F2 = perimeter;  // Perimeter feature
-//
-//    return cv::Vec2d(F1, F2);
-//}
-
 cv::Vec2d Etalon::computeFeatures(const cv::Mat& binaryImage)
 {
     // Calculate image moments
