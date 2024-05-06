@@ -5,7 +5,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
-#include "EtalonClassifier.h"
+#include "Etalon.h"
 
 void Exercise1(const cv::Mat& image);
 

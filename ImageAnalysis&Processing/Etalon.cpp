@@ -1,4 +1,5 @@
 #include "Etalon.h"
+#include <numeric> // Include for std::accumulate
 
 Etalon::Etalon()
 {
@@ -59,6 +60,7 @@ cv::Vec2d Etalon::computeFeatures(const cv::Mat& binaryImage)
     cv::Moments moments = cv::moments(binaryImage);
 
     double area = moments.m00;
+    // Assuming you have a function computeCircumference to calculate the circumference
     double circumference = computeCircumference(binaryImage);
     double F1 = (circumference * circumference) / (100 * area);
 
@@ -76,9 +78,3 @@ double Etalon::calculateDistance(const cv::Vec2d& v1, const cv::Vec2d& v2)
 {
     return cv::norm(v1 - v2);
 }
-
-
-
-
-
-

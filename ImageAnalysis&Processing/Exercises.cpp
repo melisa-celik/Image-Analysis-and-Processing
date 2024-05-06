@@ -272,57 +272,80 @@ void Exercise3(const cv::Mat& image)
 {
 	// Check if the input image is empty
 	if (image.empty()) {
-		std::cerr << "Error: Couldn't load the binary image." << std::endl;
+		std::cerr << "Error: Couldn't load the test image." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-	// Convert the image to grayscale
+	// Convert the test image to grayscale
 	cv::Mat grayscaleImage;
 	cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
 
-	// Threshold the grayscale image
+	// Threshold the grayscale image to obtain a binary image
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	// Initialize the EtalonClassifier
-	EtalonClassifier classifier;
+	// Initialize the Etalon classifier
+	Etalon classifier;
 
-	// Define features and labels
-	std::vector<cv::Vec2d> features = { {0.599484, 0.000435822}, {0.132987, 0.000564301}, {0.181424, 0.0213414}, {0.140105, 0.0123158}, {0.147994, 0.0160193} };
-	std::vector<std::string> labels = { "star", "square", "rectangle", "rectangle", "square" };
+	// Prepare training images and corresponding labels for the Etalon classifier
+	std::vector<cv::Mat> trainingImages = {
+		cv::imread("C:\\Users\\Lenovo\\Downloads\\square.png", cv::IMREAD_GRAYSCALE),
+		cv::imread("C:\\Users\\Lenovo\\Downloads\\rectangle.jpg", cv::IMREAD_GRAYSCALE),
+		cv::imread("C:\\Users\\Lenovo\\Downloads\\star-red.jpg", cv::IMREAD_GRAYSCALE)
+	};
+	std::vector<std::string> labels = { "square", "rectangle", "star" };
 
-	// Compute ethalons
-	classifier.computeEthalons(features, labels);
+	// Compute ethalons for each class using the training images and labels
+	classifier.computeEthalons(trainingImages, labels);
 
-	// Save ethalons
-	classifier.saveEthalons("ethalons.dat");
+	// Find contours in the binary image
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-	// Classify objects in the test image
-	for (size_t i = 0; i < features.size(); ++i) {
-		// Classify the shape using the EtalonClassifier
-		for (size_t j = 0; j < 2; j++) {
-			std::string shape = classifier.classifyShape(features[i][j]);
+	// Iterate over each detected contour (object)
+	for (size_t i = 0; i < contours.size(); ++i) {
+		// Convert contour to a binary mask
+		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
+		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
-			// Colorize the object based on its shape classification
-			if (shape == "square") {
-				std::cout << "Object OBJ-" << i + 1 << " is classified as a square." << std::endl;
-			}
-			else if (shape == "rectangle") {
-				std::cout << "Object OBJ-" << i + 1 << " is classified as a rectangle." << std::endl;
-			}
-			else if (shape == "star") {
-				std::cout << "Object OBJ-" << i + 1 << " is classified as a star." << std::endl;
-			}
-			else {
-				std::cout << "Object OBJ-" << i + 1 << " is classified as an unknown object." << std::endl;
-			}
+		// Classify the shape using the Etalon classifier
+		std::string shape = classifier.classifyObject(mask);
+
+		// Draw contour on the original image
+		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
+
+		// Compute area and circumference of the contour
+		double area = cv::contourArea(contours[i]);
+		double circumference = cv::arcLength(contours[i], true);
+
+		// Compute bounding box and center
+		cv::Rect bbox = cv::boundingRect(contours[i]);
+		cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+
+		// Add shape label to the image
+		cv::putText(image, shape, center, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Area: " + std::to_string(area), cv::Point(center.x, center.y + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(center.x, center.y + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+
+		// Colorize the object based on its shape classification
+		if (shape == "square") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(255, 0, 0), cv::FILLED);
+		}
+		else if (shape == "rectangle") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 0), cv::FILLED);
+		}
+		else if (shape == "star") {
+			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
 		}
 	}
 
 	// Display the result
-	cv::imshow("Result", image);
+	cv::Mat widenedImage;
+	cv::copyMakeBorder(image, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
+	cv::imshow("Shape Classification Result", widenedImage);
 	cv::waitKey(0);
 }
+
 
 //void Exercise3(const cv::Mat& image)
 //{
