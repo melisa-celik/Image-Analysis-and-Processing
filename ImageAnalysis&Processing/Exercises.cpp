@@ -100,7 +100,7 @@ void Exercise2(const cv::Mat& image)
 		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
 
 		// Classify the shape using the EtalonClassifier
-		std::string shape = classifier.classifyShape(mask);
+		std::string shape = classifier.classifyObject(mask);
 
 		// Draw contour on the original image
 		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
@@ -153,7 +153,7 @@ void Exercise3(const cv::Mat& image)
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	Etalon classifier;
+	EtalonClassifier classifier;
 
 	// Prepare training images and corresponding labels for the Etalon classifier
 	std::vector<cv::Mat> trainingImages = {

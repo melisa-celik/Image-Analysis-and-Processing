@@ -130,13 +130,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Etalon.h" />
     <ClInclude Include="EtalonClassifier.h" />
     <ClInclude Include="Exercises.h" />
     <ClInclude Include="Functions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Etalon.cpp" />
     <ClCompile Include="EtalonClassifier.cpp" />
     <ClCompile Include="Exercises.cpp" />
     <ClCompile Include="Functions.cpp" />
