@@ -8,6 +8,7 @@
 #include "EtalonClassifier.h"
 #include "Functions.h"
 #include "KMeansClustering.h"
+#include "BackPropagation.h"
 
 void Exercise1(const cv::Mat& image);
 
@@ -16,5 +17,7 @@ void Exercise2(const cv::Mat& image);
 void Exercise3(const cv::Mat& image);
 
 void Exercise4(const cv::Mat& image);
+
+void Exercise5();
 
 #endif 

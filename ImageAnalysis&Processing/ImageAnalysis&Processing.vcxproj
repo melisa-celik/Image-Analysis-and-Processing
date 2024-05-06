@@ -130,12 +130,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BackPropagation.h" />
     <ClInclude Include="EtalonClassifier.h" />
     <ClInclude Include="Exercises.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="KMeansClustering.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BackPropagation.cpp" />
     <ClCompile Include="EtalonClassifier.cpp" />
     <ClCompile Include="Exercises.cpp" />
     <ClCompile Include="Functions.cpp" />

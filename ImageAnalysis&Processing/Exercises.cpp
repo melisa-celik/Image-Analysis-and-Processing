@@ -263,3 +263,16 @@ void Exercise4(const cv::Mat& image)
 	cv::imshow("Clustered Objects", image);
 	cv::waitKey(0);
 }
+
+void Exercise5()
+{
+	NN* nn = createNN(2, 4, 2);
+
+	train(nn);
+
+	test(nn, 100);
+	
+	getchar();
+
+	releaseNN(nn);
+}

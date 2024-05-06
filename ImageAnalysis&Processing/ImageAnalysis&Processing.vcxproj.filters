@@ -27,6 +27,9 @@
     <ClInclude Include="KMeansClustering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BackPropagation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KMeansClustering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BackPropagation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

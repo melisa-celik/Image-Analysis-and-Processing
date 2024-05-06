@@ -6,10 +6,14 @@ KMeansClustering::KMeansClustering(int k) : k(k) {}
 
 void KMeansClustering::train(const std::vector<cv::Vec2d>& features, int maxIterations)
 {
-    // Initialize centroids based on first k features
+    // Initialize centroids randomly from the input features
     centroids.clear();
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> randomIndex(0, features.size() - 1);
+
     for (int i = 0; i < k; ++i) {
-        centroids.push_back(features[i]);
+        centroids.push_back(features[randomIndex(gen)]);
     }
 
     // Perform k-means clustering
