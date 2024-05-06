@@ -224,8 +224,32 @@ void Exercise4(const cv::Mat& image)
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	std::vector<cv::Vec2d> features;
+	// Calculate image moments
+	cv::Moments moments = cv::moments(binaryImage);
+
+	// Calculate area (m00) and circumference (perimeter)
+	double area = moments.m00;
+
+	// Calculate the circumference by finding contours
+	std::vector<std::vector<cv::Point>> contours;
+	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	double perimeter = 0.0;
+	if (!contours.empty()) {
+		perimeter = cv::arcLength(contours[0], true);
+	}
+
+	// Compute features F1 and F2
+	double F1 = (perimeter * perimeter) / (100.0 * area);
+	double F2_max = (0.5 * (moments.mu20 + moments.mu02)) +
+		(0.5 * sqrt(4.0 * (moments.mu11 * moments.mu11) +
+			(moments.mu20 - moments.mu02) * (moments.mu20 - moments.mu02)));
+	double F2_min = (0.5 * (moments.mu20 + moments.mu02)) -
+		(0.5 * sqrt(4.0 * (moments.mu11 * moments.mu11) +
+			(moments.mu20 - moments.mu02) * (moments.mu20 - moments.mu02)));
+	double F2 = F2_min / F2_max;
+
 	// Extract features (e.g., pixel positions) from the binary image
+	std::vector<cv::Vec2d> features;
 	for (int y = 0; y < binaryImage.rows; ++y) {
 		for (int x = 0; x < binaryImage.cols; ++x) {
 			if (binaryImage.at<uchar>(y, x) > 0) {
@@ -248,3 +272,4 @@ void Exercise4(const cv::Mat& image)
 	cv::imshow("Result", image);
 	cv::waitKey(0);
 }
+
