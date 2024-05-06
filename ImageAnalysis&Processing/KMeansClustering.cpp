@@ -6,20 +6,17 @@ KMeansClustering::KMeansClustering(int k) : k(k) {}
 
 void KMeansClustering::train(const std::vector<cv::Vec2d>& features, int maxIterations)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> randomIndex(0, features.size() - 1);
-
+    // Initialize centroids based on first k features
     centroids.clear();
-    // Initialize centroids randomly from the input features
     for (int i = 0; i < k; ++i) {
-        centroids.push_back(features[randomIndex(gen)]);
+        centroids.push_back(features[i]);
     }
 
     // Perform k-means clustering
     for (int iter = 0; iter < maxIterations; ++iter) {
         std::vector<std::vector<cv::Vec2d>> clusters(k);
-        std::vector<cv::Vec2d> newCentroids(k);
+        std::vector<cv::Vec2d> newCentroids(k, cv::Vec2d(0.0, 0.0));
+        std::vector<int> clusterSizes(k, 0);
 
         // Assign each feature to the closest centroid
         for (const auto& feature : features) {
@@ -35,18 +32,15 @@ void KMeansClustering::train(const std::vector<cv::Vec2d>& features, int maxIter
             }
 
             clusters[closestCentroid].push_back(feature);
+            newCentroids[closestCentroid] += feature;
+            clusterSizes[closestCentroid]++;
         }
 
         // Update centroids' positions
         bool centroidsChanged = false;
         for (int j = 0; j < k; ++j) {
-            if (!clusters[j].empty()) {
-                cv::Vec2d sum(0.0, 0.0);
-                for (const auto& point : clusters[j]) {
-                    sum += point;
-                }
-                newCentroids[j] = sum / static_cast<double>(clusters[j].size());
-
+            if (clusterSizes[j] > 0) {
+                newCentroids[j] /= static_cast<double>(clusterSizes[j]);
                 if (calculateDistance(newCentroids[j], centroids[j]) > 1e-6) {
                     centroidsChanged = true;
                 }

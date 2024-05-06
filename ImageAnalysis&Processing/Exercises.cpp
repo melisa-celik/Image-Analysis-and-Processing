@@ -224,52 +224,42 @@ void Exercise4(const cv::Mat& image)
 	cv::Mat binaryImage;
 	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
 
-	// Calculate image moments
 	cv::Moments moments = cv::moments(binaryImage);
-
-	// Calculate area (m00) and circumference (perimeter)
 	double area = moments.m00;
-
-	// Calculate the circumference by finding contours
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-	double perimeter = 0.0;
-	if (!contours.empty()) {
-		perimeter = cv::arcLength(contours[0], true);
-	}
 
-	// Compute features F1 and F2
-	double F1 = (perimeter * perimeter) / (100.0 * area);
-	double F2_max = (0.5 * (moments.mu20 + moments.mu02)) +
-		(0.5 * sqrt(4.0 * (moments.mu11 * moments.mu11) +
-			(moments.mu20 - moments.mu02) * (moments.mu20 - moments.mu02)));
-	double F2_min = (0.5 * (moments.mu20 + moments.mu02)) -
-		(0.5 * sqrt(4.0 * (moments.mu11 * moments.mu11) +
-			(moments.mu20 - moments.mu02) * (moments.mu20 - moments.mu02)));
-	double F2 = F2_min / F2_max;
-
-	// Extract features (e.g., pixel positions) from the binary image
 	std::vector<cv::Vec2d> features;
-	for (int y = 0; y < binaryImage.rows; ++y) {
-		for (int x = 0; x < binaryImage.cols; ++x) {
-			if (binaryImage.at<uchar>(y, x) > 0) {
-				features.emplace_back(static_cast<double>(x), static_cast<double>(y));
-			}
-		}
+
+	for (const auto& contour : contours) {
+		cv::Point2f centroid;
+		float radius;
+		cv::minEnclosingCircle(contour, centroid, radius);
+		features.emplace_back(centroid.x, centroid.y);
 	}
 
-	int k = 3;
+	int k = 3; 
 	KMeansClustering kmeans(k);
 	kmeans.train(features);
 
 	std::vector<int> clusterAssignments = kmeans.predict(features);
 
-	// Display cluster assignments
-	for (size_t i = 0; i < features.size(); ++i) {
-		std::cout << "Feature " << i << " assigned to cluster " << clusterAssignments[i] << std::endl;
+	for (size_t i = 0; i < contours.size(); ++i) {
+		std::cout << "Object " << i + 1 << " assigned to cluster " << clusterAssignments[i] << std::endl;
+		cv::Scalar color;
+		if (clusterAssignments[i] == 0) {
+			color = cv::Scalar(255, 0, 0); 
+		}
+		else if (clusterAssignments[i] == 1) {
+			color = cv::Scalar(0, 255, 0); 
+		}
+		else if (clusterAssignments[i] == 2) {
+			color = cv::Scalar(0, 0, 255); // Blue
+		}
+		cv::drawContours(image, contours, static_cast<int>(i), color, 2);
 	}
 
-	cv::imshow("Result", image);
+	// Show the result
+	cv::imshow("Clustered Objects", image);
 	cv::waitKey(0);
 }
-
