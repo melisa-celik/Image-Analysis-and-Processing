@@ -133,11 +133,13 @@
     <ClInclude Include="EtalonClassifier.h" />
     <ClInclude Include="Exercises.h" />
     <ClInclude Include="Functions.h" />
+    <ClInclude Include="KMeansClustering.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EtalonClassifier.cpp" />
     <ClCompile Include="Exercises.cpp" />
     <ClCompile Include="Functions.cpp" />
+    <ClCompile Include="KMeansClustering.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

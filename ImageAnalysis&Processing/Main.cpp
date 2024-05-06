@@ -2,6 +2,8 @@
 #include <opencv2/opencv.hpp>
 #include "Functions.h"
 #include "Exercises.h"
+#include "EtalonClassifier.h"
+
 
 int main()
 {
@@ -21,7 +23,9 @@ int main()
         return EXIT_FAILURE;
     }
 
-    Exercise3(testImageEthalon);
+    //Exercise3(testImageEthalon);
+
+    Exercise4(testImageEthalon);
 
     return EXIT_SUCCESS;
 }

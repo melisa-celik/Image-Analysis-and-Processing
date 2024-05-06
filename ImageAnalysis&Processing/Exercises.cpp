@@ -210,3 +210,41 @@ void Exercise3(const cv::Mat& image)
 	cv::imshow("Final Result", image);
 	cv::waitKey(0);
 }
+
+void Exercise4(const cv::Mat& image)
+{
+	if (image.empty()) {
+		std::cerr << "Error: Couldn't load the test image." << std::endl;
+		return;
+	}
+
+	cv::Mat grayscaleImage;
+	cv::cvtColor(image, grayscaleImage, cv::COLOR_BGR2GRAY);
+
+	cv::Mat binaryImage;
+	cv::threshold(grayscaleImage, binaryImage, 128, 255, cv::THRESH_BINARY);
+
+	std::vector<cv::Vec2d> features;
+	// Extract features (e.g., pixel positions) from the binary image
+	for (int y = 0; y < binaryImage.rows; ++y) {
+		for (int x = 0; x < binaryImage.cols; ++x) {
+			if (binaryImage.at<uchar>(y, x) > 0) {
+				features.emplace_back(static_cast<double>(x), static_cast<double>(y));
+			}
+		}
+	}
+
+	int k = 3;
+	KMeansClustering kmeans(k);
+	kmeans.train(features);
+
+	std::vector<int> clusterAssignments = kmeans.predict(features);
+
+	// Display cluster assignments
+	for (size_t i = 0; i < features.size(); ++i) {
+		std::cout << "Feature " << i << " assigned to cluster " << clusterAssignments[i] << std::endl;
+	}
+
+	cv::imshow("Result", image);
+	cv::waitKey(0);
+}

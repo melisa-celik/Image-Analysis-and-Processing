@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ETALON_H
-#define ETALON_H
+#ifndef ETALONCLASSIFIER_H
+#define ETALONCLASSIFIER_H
 
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -24,4 +24,4 @@ private:
     double calculateDistance(const cv::Vec2d& v1, const cv::Vec2d& v2);
 };
 
-#endif // ETALON_H
+#endif // ETALONCLASSIFIER_H
