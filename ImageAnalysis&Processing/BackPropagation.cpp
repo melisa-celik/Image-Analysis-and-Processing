@@ -96,13 +96,11 @@ double backPropagation(NN* nn, double* t)
 {
 	double error = 0.0;
 
-	// Calculate output layer errors
 	for (int i = 0; i < nn->n[nn->l - 1]; i++) {
 		nn->d[nn->l - 1][i] = (t[i] - nn->y[nn->l - 1][i]) * LAMBDA * nn->y[nn->l - 1][i] * (1.0 - nn->y[nn->l - 1][i]);
 		error += 0.5 * pow((t[i] - nn->y[nn->l - 1][i]), 2);
 	}
 
-	// Backpropagate the error to hidden layers
 	for (int k = nn->l - 2; k > 0; k--) {
 		for (int i = 0; i < nn->n[k]; i++) {
 			double sum = 0.0;
@@ -113,7 +111,6 @@ double backPropagation(NN* nn, double* t)
 		}
 	}
 
-	// Update weights
 	for (int k = 0; k < nn->l - 1; k++) {
 		for (int i = 0; i < nn->n[k + 1]; i++) {
 			for (int j = 0; j < nn->n[k]; j++) {

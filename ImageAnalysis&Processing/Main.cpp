@@ -27,7 +27,7 @@ int main()
 
     //Exercise4(testImage);
 
-    Exercise5();
+    //Exercise5();
 
     return EXIT_SUCCESS;
 }
