@@ -328,8 +328,8 @@ void Exercise3(const cv::Mat& image)
 		// Add shape label, object index, area, and circumference to the image
 		std::string objectText = "Object " + std::to_string(i + 1) + ": " + shape;
 		cv::putText(image, objectText, cv::Point(bbox.x, bbox.y - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255), 1, cv::LINE_AA);
-		cv::putText(image, "Area: " + std::to_string(area), cv::Point(bbox.x, bbox.y + bbox.height + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
-		cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(bbox.x, bbox.y + bbox.height + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		//cv::putText(image, "Area: " + std::to_string(area), cv::Point(bbox.x, bbox.y + bbox.height + 15), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
+		//cv::putText(image, "Circumference: " + std::to_string(circumference), cv::Point(bbox.x, bbox.y + bbox.height + 30), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255), 1, cv::LINE_AA);
 
 		// Colorize the object based on its shape classification
 		if (shape == "square") {
@@ -342,14 +342,16 @@ void Exercise3(const cv::Mat& image)
 			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
 		}
 
-		// Clear the classifier state for the next contour
-		classifier = Etalon(); // Reset the classifier for the next object
+		// Display the result with updated contours and annotations
+		cv::imshow("Shape Classification Result", image);
+		cv::waitKey(1000); // Pause briefly to display each object before processing the next one
+
+		// Clear the binary mask to prepare for the next contour
+		mask.setTo(0);
 	}
 
-	// Display the result
-	cv::Mat widenedImage;
-	cv::copyMakeBorder(image, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
-	cv::imshow("Shape Classification Result", widenedImage);
+	// Final display of the result
+	cv::imshow("Final Result", image);
 	cv::waitKey(0);
 }
 
