@@ -287,74 +287,42 @@ void Exercise3(const cv::Mat& image)
 	// Initialize the EtalonClassifier
 	EtalonClassifier classifier;
 
-	// Prepare training images and corresponding labels
-	std::vector<cv::Mat> trainingImages;
-	std::vector<std::string> labels;
+	// Define features and labels
+	std::vector<cv::Vec2d> features = { {0.599484, 0.000435822}, {0.132987, 0.000564301}, {0.181424, 0.0213414}, {0.140105, 0.0123158}, {0.147994, 0.0160193} };
+	std::vector<std::string> labels = { "star", "square", "rectangle", "rectangle", "square" };
 
-	// Compute features for each object in the image
-	std::vector<cv::Vec2d> objectFeatures;
-
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(binaryImage.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-	for (size_t i = 0; i < contours.size(); ++i) {
-		// Convert contour to a binary mask
-		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
-		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
-
-		// Compute features for the object
-		cv::Vec2d objectFeature;
-		computeFeatures(mask, static_cast<int>(i + 1), objectFeature);
-		objectFeatures.push_back(objectFeature);
-
-		// Assign a unique label to each object
-		labels.push_back("OBJ-" + std::to_string(i));
-	}
-
-	// Compute ethalons for each class
-	classifier.computeEthalons(objectFeatures, labels);
+	// Compute ethalons
+	classifier.computeEthalons(features, labels);
 
 	// Save ethalons
 	classifier.saveEthalons("ethalons.dat");
 
 	// Classify objects in the test image
-	for (size_t i = 0; i < contours.size(); ++i) {
-		// Convert contour to a binary mask
-		cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
-		cv::drawContours(mask, contours, static_cast<int>(i), cv::Scalar(255), cv::FILLED);
-
+	for (size_t i = 0; i < features.size(); ++i) {
 		// Classify the shape using the EtalonClassifier
-		std::string shape = classifier.classifyShape(mask);
+		for (size_t j = 0; j < 2; j++) {
+			std::string shape = classifier.classifyShape(features[i][j]);
 
-		// Draw contour on the original image
-		cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(128), 2);
-
-		// Colorize the object based on its shape classification
-		if (shape == "square") {
-			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(255, 0, 0), cv::FILLED);
-			std::cout << "Object OBJ-" << i + 1 << " is classified as a square." << std::endl;
-		}
-		else if (shape == "rectangle") {
-			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 0), cv::FILLED);
-			std::cout << "Object OBJ-" << i + 1 << " is classified as a rectangle." << std::endl;
-		}
-		else if (shape == "star") {
-			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 255, 255), cv::FILLED);
-			std::cout << "Object OBJ-" << i + 1 << " is classified as a star." << std::endl;
-		}
-		else {
-			cv::drawContours(image, contours, static_cast<int>(i), cv::Scalar(0, 0, 255), cv::FILLED);
-			std::cout << "Object OBJ-" << i + 1 << " is classified as an unknown object." << std::endl;
+			// Colorize the object based on its shape classification
+			if (shape == "square") {
+				std::cout << "Object OBJ-" << i + 1 << " is classified as a square." << std::endl;
+			}
+			else if (shape == "rectangle") {
+				std::cout << "Object OBJ-" << i + 1 << " is classified as a rectangle." << std::endl;
+			}
+			else if (shape == "star") {
+				std::cout << "Object OBJ-" << i + 1 << " is classified as a star." << std::endl;
+			}
+			else {
+				std::cout << "Object OBJ-" << i + 1 << " is classified as an unknown object." << std::endl;
+			}
 		}
 	}
 
 	// Display the result
-	cv::Mat widenedImage;
-	cv::copyMakeBorder(image, widenedImage, 0, 0, 0, 200, cv::BORDER_CONSTANT, cv::Scalar(0));
-	cv::imshow("Result", widenedImage);
+	cv::imshow("Result", image);
 	cv::waitKey(0);
 }
-
 
 //void Exercise3(const cv::Mat& image)
 //{

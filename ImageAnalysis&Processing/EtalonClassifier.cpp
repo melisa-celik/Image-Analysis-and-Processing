@@ -183,7 +183,7 @@ cv::Vec2d EtalonClassifier::computeFeatures(const cv::Mat& binaryImage, int imgI
         std::cout << "F2: " << F2 << std::endl;
         std::cout << "--------------------------------------------------" << std::endl;
 
-        return cv::Vec2d(numCorners, F2);
+        return cv::Vec2d(F1, F2);
     }
     else {
         // Use the provided features
