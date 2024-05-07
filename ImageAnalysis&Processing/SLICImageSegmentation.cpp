@@ -14,45 +14,51 @@ SLICImageSegmentation::~SLICImageSegmentation()
 {
 }
 
+double SLICImageSegmentation::computeGradientMagnitude(const cv::Mat& img, int x, int y)
+{
+    if (x < 1 || y < 1 || x >= img.cols - 1 || y >= img.rows - 1) {
+        return 0.0; 
+    }
+
+    cv::Mat grayImg;
+    cv::cvtColor(img, grayImg, cv::COLOR_BGR2GRAY);
+
+    // Sobel gradient calculation
+    cv::Mat gradX, gradY;
+    cv::Sobel(grayImg, gradX, CV_16S, 1, 0);
+    cv::Sobel(grayImg, gradY, CV_16S, 0, 1);
+
+    // Calculate gradient magnitude at (x, y)
+    double dx = static_cast<double>(gradX.at<short>(y, x));
+    double dy = static_cast<double>(gradY.at<short>(y, x));
+    return std::sqrt(dx * dx + dy * dy);
+}
+
 void SLICImageSegmentation::initializeClusterCenters()
 {
     clusterCenters.clear();
 
-    // Sample cluster centers at regular grid steps S
     for (int y = S / 2; y < image.rows; y += S) {
         for (int x = S / 2; x < image.cols; x += S) {
             // Find lowest gradient position in a 3x3 neighborhood
-            int roiWidth = std::min(3, image.cols - x);
-            int roiHeight = std::min(3, image.rows - y);
-            cv::Rect roi(std::max(0, x - 1), std::max(0, y - 1), roiWidth, roiHeight);
-            cv::Mat neighborhood = image(roi);
+            double minGradient = std::numeric_limits<double>::max();
+            cv::Point minLoc;
 
-            if (neighborhood.empty()) {
-                std::cerr << "Error: Neighborhood is empty." << std::endl;
-                continue; // Skip to next iteration if neighborhood is empty
+            for (int ny = std::max(0, y - 1); ny <= std::min(y + 1, image.rows - 1); ++ny) {
+                for (int nx = std::max(0, x - 1); nx <= std::min(x + 1, image.cols - 1); ++nx) {
+                    double gradient = computeGradientMagnitude(image, nx, ny);
+                    if (gradient < minGradient) {
+                        minGradient = gradient;
+                        minLoc = cv::Point(nx, ny);
+                    }
+                }
             }
 
-            cv::Point min_loc;
-            cv::Mat grayNeighborhood;
-            cv::cvtColor(neighborhood, grayNeighborhood, cv::COLOR_BGR2GRAY);
-
-            cv::minMaxLoc(grayNeighborhood, nullptr, nullptr, &min_loc);
-
-            // Calculate valid position in the original image
-            cv::Point original_loc = roi.tl() + min_loc;
-
-            // Check if original_loc is within the bounds of the original image
-            if (original_loc.x < 0 || original_loc.y < 0 || original_loc.x >= image.cols || original_loc.y >= image.rows) {
-                std::cerr << "Error: Invalid original_loc coordinates." << std::endl;
-                std::cerr << "original_loc: " << original_loc << ", image.cols: " << image.cols << ", image.rows: " << image.rows << std::endl;
-                continue; // Skip to next iteration if original_loc is invalid
-            }
-
-            cv::Vec3b color = image.at<cv::Vec3b>(original_loc);
+            cv::Vec3b color = image.at<cv::Vec3b>(minLoc);
 
             // Initialize cluster center [R, G, B, x, y]
             std::vector<double> center = { static_cast<double>(color[2]), static_cast<double>(color[1]),
-                                            static_cast<double>(color[0]), static_cast<double>(x), static_cast<double>(y) };
+                                            static_cast<double>(color[0]), static_cast<double>(minLoc.x), static_cast<double>(minLoc.y) };
             clusterCenters.push_back(center);
         }
     }
@@ -60,13 +66,11 @@ void SLICImageSegmentation::initializeClusterCenters()
     // Initialize cluster assignments (each pixel initially assigned to cluster 0)
     clusterAssignments.assign(image.rows * image.cols, 0);
 
-    // Initialize previous cluster centers (same as current cluster centers at start)
     clusterCentersPrev = clusterCenters;
 }
 
 
-void SLICImageSegmentation::assignPixelsToClusters()
-{
+void SLICImageSegmentation::assignPixelsToClusters() {
     const int numClusters = static_cast<int>(clusterCenters.size());
 
     for (int y = 0; y < image.rows; ++y) {
@@ -82,11 +86,11 @@ void SLICImageSegmentation::assignPixelsToClusters()
                 double xk = clusterCenters[k][3];
                 double yk = clusterCenters[k][4];
 
-                // Calculate distance DS (Equation 3)
-                double dRGB = sqrt((Rk - image.at<cv::Vec3b>(y, x)[2]) * (Rk - image.at<cv::Vec3b>(y, x)[2]) +
-                    (Gk - image.at<cv::Vec3b>(y, x)[1]) * (Gk - image.at<cv::Vec3b>(y, x)[1]) +
-                    (Bk - image.at<cv::Vec3b>(y, x)[0]) * (Bk - image.at<cv::Vec3b>(y, x)[0]));
-                double dxy = sqrt((xk - x) * (xk - x) + (yk - y) * (yk - y));
+                // Calculate distance using Eq. 3 (dRGB and dxy)
+                double dRGB = std::sqrt(SQR(Rk - image.at<cv::Vec3b>(y, x)[2]) +
+                    SQR(Gk - image.at<cv::Vec3b>(y, x)[1]) +
+                    SQR(Bk - image.at<cv::Vec3b>(y, x)[0]));
+                double dxy = std::sqrt(SQR(xk - x) + SQR(yk - y));
                 double DS = dRGB + (m / S) * dxy;
 
                 // Assign pixel to the closest cluster
@@ -102,8 +106,9 @@ void SLICImageSegmentation::assignPixelsToClusters()
     }
 }
 
-void SLICImageSegmentation::updateClusterCenters()
-{
+
+
+void SLICImageSegmentation::updateClusterCenters() {
     const int numClusters = static_cast<int>(clusterCenters.size());
 
     // Reset cluster center accumulators
@@ -139,15 +144,17 @@ void SLICImageSegmentation::updateClusterCenters()
     }
 }
 
+
+
 void SLICImageSegmentation::segmentImage()
 {
-    const double convergenceThreshold = 1.0; // Adjust as needed
+    const double convergenceThreshold = 2.0; 
     bool converged = false;
     int iteration = 0;
 
-    while (!converged && iteration < 100) { // Limit iterations to avoid infinite loop
-        assignPixelsToClusters(); // Assign pixels to clusters
-        updateClusterCenters();   // Update cluster centers
+    while (!converged && iteration < 100) { 
+        assignPixelsToClusters(); 
+        updateClusterCenters();   
 
         // Check for convergence based on the movement of cluster centers
         double maxCenterShift = 0.0;

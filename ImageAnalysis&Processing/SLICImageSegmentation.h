@@ -13,6 +13,7 @@ public:
     SLICImageSegmentation(const cv::Mat& img, int k, double balance);
     ~SLICImageSegmentation();
 
+    double computeGradientMagnitude(const cv::Mat& img, int x, int y);
     void initializeClusterCenters();
     void assignPixelsToClusters();
     void updateClusterCenters();
@@ -21,13 +22,13 @@ public:
 
 private:
     cv::Mat image;
-    int K;          // Number of desired clusters
-    int S;          // Grid step
-    double m;       // Balancing factor
+    int K;          
+    int S;         
+    double m;       
 
     std::vector<std::vector<double>> clusterCenters;
     std::vector<int> clusterAssignments;
-    std::vector<std::vector<double>> clusterCentersPrev; // Previous cluster centers
+    std::vector<std::vector<double>> clusterCentersPrev; 
 };
 
 #endif // SLIC_IMAGE_SEGMENTATION_H

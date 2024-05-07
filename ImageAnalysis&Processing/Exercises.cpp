@@ -280,7 +280,7 @@ void Exercise5()
 void Exercise6(const cv::Mat& image)
 {
 	int K = 100;
-	double balance = 10.0;
+	double balance = 50.0;
 
 	if (image.empty()) {
 		std::cerr << "Error: Couldn't load the test image." << std::endl;
@@ -300,6 +300,6 @@ void Exercise6(const cv::Mat& image)
 	cv::namedWindow("Segmented Image", cv::WINDOW_NORMAL);
 	cv::imshow("Segmented Image", segmentedImage);
 
-	cv::waitKey(0); // Wait for a key press
-	cv::destroyAllWindows(); // Close all windows
+	cv::waitKey(0); 
+	cv::destroyAllWindows(); 
 }
