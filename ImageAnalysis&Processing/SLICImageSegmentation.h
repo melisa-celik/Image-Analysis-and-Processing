@@ -5,6 +5,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <cmath>
 
 #define SQR(x) ((x) * (x))
 

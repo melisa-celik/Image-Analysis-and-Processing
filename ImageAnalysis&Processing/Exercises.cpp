@@ -280,7 +280,7 @@ void Exercise5()
 void Exercise6(const cv::Mat& image)
 {
 	int K = 100;
-	double balance = 50.0;
+	double balance = 50.0; // Trial
 
 	if (image.empty()) {
 		std::cerr << "Error: Couldn't load the test image." << std::endl;

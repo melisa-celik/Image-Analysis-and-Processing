@@ -69,7 +69,6 @@ void SLICImageSegmentation::initializeClusterCenters()
     clusterCentersPrev = clusterCenters;
 }
 
-
 void SLICImageSegmentation::assignPixelsToClusters() {
     const int numClusters = static_cast<int>(clusterCenters.size());
 
@@ -106,8 +105,6 @@ void SLICImageSegmentation::assignPixelsToClusters() {
     }
 }
 
-
-
 void SLICImageSegmentation::updateClusterCenters() {
     const int numClusters = static_cast<int>(clusterCenters.size());
 
@@ -143,8 +140,6 @@ void SLICImageSegmentation::updateClusterCenters() {
         }
     }
 }
-
-
 
 void SLICImageSegmentation::segmentImage()
 {
