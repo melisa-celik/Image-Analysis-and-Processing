@@ -168,8 +168,8 @@ def main():
     validation(test_loader, model)
 
     # uncoment to run sliding window
-    # img = Image.load('numbers.png')
-    # sliding_window(model, img, (28, 28))
+    img = Image.load('numbers.png')
+    sliding_window(model, img, (28, 28))
 
 if __name__ == '__main__':
     main()
