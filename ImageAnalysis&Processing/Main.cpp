@@ -16,7 +16,9 @@ int main()
 
     //Exercise2(binaryImage);
 
-    cv::Mat testImage = cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png");
+    //cv::Mat testImage = cv::imread("C:\\Users\\Lenovo\\Downloads\\etalon.png");
+
+    cv::Mat testImage = cv::imread("C:\\Users\\Lenovo\\Downloads\\originalImage.jpg");
 
     if (testImage.empty()) {
         std::cerr << "Error: Failed to load image." << std::endl;
@@ -28,6 +30,8 @@ int main()
     //Exercise4(testImage);
 
     //Exercise5();
+
+    Exercise6(testImage);
 
     return EXIT_SUCCESS;
 }

@@ -276,3 +276,30 @@ void Exercise5()
 
 	releaseNN(nn);
 }
+
+void Exercise6(const cv::Mat& image)
+{
+	int K = 100;
+	double balance = 10.0;
+
+	if (image.empty()) {
+		std::cerr << "Error: Couldn't load the test image." << std::endl;
+		return;
+	}
+
+	SLICImageSegmentation slic(image, K, balance);
+
+	slic.segmentImage();
+
+	cv::Mat segmentedImage = slic.getSegmentedImage();
+
+	// Display original and segmented images
+	cv::namedWindow("Original Image", cv::WINDOW_NORMAL);
+	cv::imshow("Original Image", image);
+
+	cv::namedWindow("Segmented Image", cv::WINDOW_NORMAL);
+	cv::imshow("Segmented Image", segmentedImage);
+
+	cv::waitKey(0); // Wait for a key press
+	cv::destroyAllWindows(); // Close all windows
+}

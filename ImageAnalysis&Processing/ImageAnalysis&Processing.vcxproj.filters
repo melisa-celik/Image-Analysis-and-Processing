@@ -30,6 +30,9 @@
     <ClInclude Include="BackPropagation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SLICImageSegmentation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BackPropagation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SLICImageSegmentation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

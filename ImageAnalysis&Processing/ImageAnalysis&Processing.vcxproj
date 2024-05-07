@@ -135,6 +135,7 @@
     <ClInclude Include="Exercises.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="KMeansClustering.h" />
+    <ClInclude Include="SLICImageSegmentation.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BackPropagation.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="Functions.cpp" />
     <ClCompile Include="KMeansClustering.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="SLICImageSegmentation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
