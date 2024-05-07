@@ -54,14 +54,12 @@ class HOG:
         return normalizedFeatures
 
     def computeHogFeatures(self, image):
-        if len(image.shape) > 2:
+        if len(image.shape) > 2 and image.shape[2] > 1:
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         magnitude, orientation = self.computeGradients(image)
-
         histograms = self.createHistograms(magnitude, orientation)
-
-        blockSize = 2  # Adjust as needed
+        blockSize = 2
         hogFeatures = self.normalizeBlocks(histograms, blockSize)
 
         return hogFeatures

@@ -29,6 +29,15 @@ class LeNet(torch.nn.Module):
         x = self.fc3(x)
         return x
 
+def preprocessImage(imagePath):
+    image = Image.open(imagePath)
+    transform = transforms.Compose([
+        transforms.Grayscale(),
+        transforms.Resize((28, 28)),
+        transforms.ToTensor()
+    ])
+    return transform(image).unsqueeze(0)
+
 
 def train(data, model):
     model.train()
