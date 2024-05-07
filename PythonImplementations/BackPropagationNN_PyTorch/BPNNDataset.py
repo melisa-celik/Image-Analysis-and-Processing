@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset, DataLoader
 
+
 class BPNNDataset(Dataset):
     def __init__(self, features, labels):
         self.labels = labels
